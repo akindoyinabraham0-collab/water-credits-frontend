@@ -38,7 +38,24 @@ export const routes: Routes = [
       },
       {
         path: 'projects',
-        loadComponent: () => import('./features/projects/projects-list/projects-list').then(m => m.ProjectsListComponent)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/projects/projects-list/projects-list').then(m => m.ProjectsListComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./features/projects/project-form/project-form').then(m => m.ProjectFormComponent)
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./features/projects/project-detail/project-detail').then(m => m.ProjectDetailComponent)
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () => import('./features/projects/project-form/project-form').then(m => m.ProjectFormComponent)
+          }
+        ]
       },
       {
         path: 'sensors',
