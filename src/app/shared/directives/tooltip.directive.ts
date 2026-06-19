@@ -2,10 +2,13 @@ import { Directive, ElementRef, HostListener, Input, Renderer2 } from '@angular/
 
 @Directive({ selector: '[appTooltip]', standalone: true })
 export class TooltipDirective {
-  @Input('appTooltip') tooltipText: string = '';
+  @Input('appTooltip') tooltipText = '';
   private tooltipEl: HTMLElement | null = null;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2,
+  ) {}
 
   @HostListener('mouseenter') onMouseEnter(): void {
     if (!this.tooltipText) return;

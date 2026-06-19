@@ -16,18 +16,57 @@ export interface ColumnDef {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [NgClass, NgIf, NgFor, NgTemplateOutlet, LoadingSpinnerComponent, EmptyStateComponent, PaginationControlsComponent, LucideAngularModule],
+  imports: [
+    NgClass,
+    NgIf,
+    NgFor,
+    NgTemplateOutlet,
+    LoadingSpinnerComponent,
+    EmptyStateComponent,
+    PaginationControlsComponent,
+    LucideAngularModule,
+  ],
   template: `
-    <div class="bg-white dark:bg-dark-bg-lighter rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+    <div
+      class="bg-white dark:bg-dark-bg-lighter rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+    >
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
             <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-dark-bg">
-              <th *ngFor="let col of columns" [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center', 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50': col.sortable}" class="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider" [style.width]="col.width">
-                <div class="flex items-center gap-1" [ngClass]="{'justify-end': col.align === 'right', 'justify-center': col.align === 'center'}">
+              <th
+                *ngFor="let col of columns"
+                [ngClass]="{
+                  'text-right': col.align === 'right',
+                  'text-center': col.align === 'center',
+                  'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50': col.sortable,
+                }"
+                class="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                [style.width]="col.width"
+              >
+                <div
+                  class="flex items-center gap-1"
+                  [ngClass]="{
+                    'justify-end': col.align === 'right',
+                    'justify-center': col.align === 'center',
+                  }"
+                >
                   {{ col.label }}
-                  <button *ngIf="col.sortable" (click)="sort.emit(col.key)" class="text-slate-300 hover:text-slate-500">
-                    <lucide-angular [img]="sortColumn === col.key && sortDirection === 'ASC' ? ArrowUpIcon : sortColumn === col.key && sortDirection === 'DESC' ? ArrowDownIcon : ChevronsUpDownIcon" class="w-3.5 h-3.5"></lucide-angular>
+                  <button
+                    *ngIf="col.sortable"
+                    (click)="sort.emit(col.key)"
+                    class="text-slate-300 hover:text-slate-500"
+                  >
+                    <lucide-angular
+                      [img]="
+                        sortColumn === col.key && sortDirection === 'ASC'
+                          ? ArrowUpIcon
+                          : sortColumn === col.key && sortDirection === 'DESC'
+                            ? ArrowDownIcon
+                            : ChevronsUpDownIcon
+                      "
+                      class="w-3.5 h-3.5"
+                    ></lucide-angular>
                   </button>
                 </div>
               </th>
@@ -49,11 +88,26 @@ export interface ColumnDef {
               </tr>
             </ng-container>
             <ng-container *ngIf="!loading && data.length > 0">
-              <tr *ngFor="let row of data; let i = index" (click)="rowClick.emit(row)" [ngClass]="{'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50': rowClick.observed, 'border-b border-slate-100 dark:border-slate-700/50': i !== data.length - 1}">
+              <tr
+                *ngFor="let row of data; let i = index"
+                (click)="rowClick.emit(row)"
+                [ngClass]="{
+                  'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50': rowClick.observed,
+                  'border-b border-slate-100 dark:border-slate-700/50': i !== data.length - 1,
+                }"
+              >
                 <ng-container *ngFor="let col of columns">
-                  <td [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center'}" class="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
+                  <td
+                    [ngClass]="{
+                      'text-right': col.align === 'right',
+                      'text-center': col.align === 'center',
+                    }"
+                    class="px-4 py-3 text-sm text-slate-700 dark:text-slate-300"
+                  >
                     <ng-container *ngIf="rowTemplate; else defaultCell">
-                      <ng-container *ngTemplateOutlet="rowTemplate; context: { $implicit: row, column: col }"></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="rowTemplate; context: { $implicit: row, column: col }"
+                      ></ng-container>
                     </ng-container>
                     <ng-template #defaultCell>
                       {{ getNestedValue(row, col.key) }}
@@ -74,20 +128,20 @@ export interface ColumnDef {
         (goToPage)="pageChange.emit($event)"
       />
     </div>
-  `
+  `,
 })
 export class DataTableComponent {
   @Input() columns: ColumnDef[] = [];
   @Input() data: any[] = [];
-  @Input() loading: boolean = false;
-  @Input() emptyTitle: string = 'No data';
-  @Input() emptyMessage: string = '';
-  @Input() page: number = 1;
-  @Input() totalPages: number = 1;
-  @Input() total: number = 0;
-  @Input() limit: number = 10;
-  @Input() showPagination: boolean = true;
-  @Input() sortColumn: string = '';
+  @Input() loading = false;
+  @Input() emptyTitle = 'No data';
+  @Input() emptyMessage = '';
+  @Input() page = 1;
+  @Input() totalPages = 1;
+  @Input() total = 0;
+  @Input() limit = 10;
+  @Input() showPagination = true;
+  @Input() sortColumn = '';
   @Input() sortDirection: 'ASC' | 'DESC' = 'ASC';
   @Output() rowClick = new EventEmitter<any>();
   @Output() sort = new EventEmitter<string>();

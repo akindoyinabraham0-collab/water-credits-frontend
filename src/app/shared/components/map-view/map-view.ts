@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import * as L from 'leaflet';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -22,18 +22,21 @@ export interface MapMarker {
   standalone: true,
   imports: [],
   template: `
-    <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700" [style.height.px]="height">
+    <div
+      class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700"
+      [style.height.px]="height"
+    >
       <div #mapContainer class="w-full h-full"></div>
     </div>
-  `
+  `,
 })
 export class MapViewComponent implements AfterViewInit, OnDestroy {
   @Input() markers: MapMarker[] = [];
-  @Input() height: number = 400;
-  @Input() centerLat: number = 20;
-  @Input() centerLng: number = 0;
-  @Input() zoom: number = 2;
-  @Input() clickable: boolean = false;
+  @Input() height = 400;
+  @Input() centerLat = 20;
+  @Input() centerLng = 0;
+  @Input() zoom = 2;
+  @Input() clickable = false;
 
   @ViewChild('mapContainer') mapContainer!: ElementRef<HTMLDivElement>;
   private map: L.Map | null = null;
@@ -63,7 +66,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   }
 
   private addMarkers(): void {
-    this.markers.forEach(marker => {
+    this.markers.forEach((marker) => {
       const color = this.getStatusColor(marker.status);
       const icon = L.divIcon({
         className: 'custom-marker',
@@ -72,8 +75,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
         iconAnchor: [6, 6],
       });
 
-      const m = L.marker([marker.latitude, marker.longitude], { icon })
-        .addTo(this.map!);
+      const m = L.marker([marker.latitude, marker.longitude], { icon }).addTo(this.map!);
 
       if (marker.popupContent) {
         m.bindPopup(marker.popupContent);
@@ -81,19 +83,27 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
     });
 
     if (this.markers.length > 0) {
-      const bounds = L.latLngBounds(this.markers.map(m => [m.latitude, m.longitude] as [number, number]));
+      const bounds = L.latLngBounds(
+        this.markers.map((m) => [m.latitude, m.longitude] as [number, number]),
+      );
       this.map?.fitBounds(bounds, { padding: [50, 50] });
     }
   }
 
   private getStatusColor(status?: string): string {
     switch (status) {
-      case 'active': return '#10B981';
-      case 'baseline': return '#3B82F6';
-      case 'registered': return '#7B2FBE';
-      case 'completed': return '#059669';
-      case 'closed': return '#EF4444';
-      default: return '#94A3B8';
+      case 'active':
+        return '#10B981';
+      case 'baseline':
+        return '#3B82F6';
+      case 'registered':
+        return '#7B2FBE';
+      case 'completed':
+        return '#059669';
+      case 'closed':
+        return '#EF4444';
+      default:
+        return '#94A3B8';
     }
   }
 }

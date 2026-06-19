@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FarmerDashboard } from './farmer-dashboard';
+import { FarmerDashboardComponent } from './farmer-dashboard';
 
-describe('FarmerDashboard', () => {
-  let component: FarmerDashboard;
-  let fixture: ComponentFixture<FarmerDashboard>;
+describe('FarmerDashboardComponent', () => {
+  let component: FarmerDashboardComponent;
+  let fixture: ComponentFixture<FarmerDashboardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FarmerDashboard]
-    })
-    .compileComponents();
+      imports: [FarmerDashboardComponent],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(FarmerDashboard);
+    fixture = TestBed.createComponent(FarmerDashboardComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

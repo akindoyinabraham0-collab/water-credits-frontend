@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GovernanceDashboard } from './governance-dashboard';
+import { GovernanceDashboardComponent } from './governance-dashboard';
 
-describe('GovernanceDashboard', () => {
-  let component: GovernanceDashboard;
-  let fixture: ComponentFixture<GovernanceDashboard>;
+describe('GovernanceDashboardComponent', () => {
+  let component: GovernanceDashboardComponent;
+  let fixture: ComponentFixture<GovernanceDashboardComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GovernanceDashboard]
-    })
-    .compileComponents();
+      imports: [GovernanceDashboardComponent],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(GovernanceDashboard);
+    fixture = TestBed.createComponent(GovernanceDashboardComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

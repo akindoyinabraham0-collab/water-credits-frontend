@@ -16,14 +16,20 @@ import { LucideAngularModule, Save, RotateCcw, Settings } from 'lucide-angular';
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Fees & Parameters</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Configure protocol fees, voting parameters, and quality weights</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Configure protocol fees, voting parameters, and quality weights
+          </p>
         </div>
         <div class="flex items-center gap-2">
           <button (click)="resetForm()" class="btn btn-outline flex items-center gap-2">
             <lucide-angular [img]="RotateCcw" class="w-4 h-4"></lucide-angular>
             Reset
           </button>
-          <button (click)="saveConfig()" [disabled]="saving" class="btn btn-primary flex items-center gap-2">
+          <button
+            (click)="saveConfig()"
+            [disabled]="saving"
+            class="btn btn-primary flex items-center gap-2"
+          >
             <lucide-angular [img]="Save" class="w-4 h-4"></lucide-angular>
             {{ saving ? 'Saving...' : 'Save Changes' }}
           </button>
@@ -36,35 +42,48 @@ import { LucideAngularModule, Save, RotateCcw, Settings } from 'lucide-angular';
 
       <ng-container *ngIf="!loading">
         <div class="card p-6">
-          <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-6 flex items-center gap-2">
+          <h3
+            class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-6 flex items-center gap-2"
+          >
             <lucide-angular [img]="Settings" class="w-4 h-4 text-slate-400"></lucide-angular>
             Governance Configuration
           </h3>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-4">Current Values</p>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-4">
+                Current Values
+              </p>
               <div class="space-y-3">
-                <div *ngFor="let field of configFields" class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-dark-bg">
+                <div
+                  *ngFor="let field of configFields"
+                  class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50 dark:bg-dark-bg"
+                >
                   <span class="text-sm text-slate-600 dark:text-slate-400">{{ field.label }}</span>
-                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ getCurrentDisplay(field) }}</span>
+                  <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{
+                    getCurrentDisplay(field)
+                  }}</span>
                 </div>
               </div>
             </div>
 
             <div>
-              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-4">Proposed Values</p>
+              <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-4">
+                Proposed Values
+              </p>
               <div class="space-y-4">
                 <div *ngFor="let field of configFields" class="space-y-1">
-                  <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ field.label }}</label>
+                  <label class="text-xs font-medium text-slate-500 dark:text-slate-400">{{
+                    field.label
+                  }}</label>
                   <div *ngIf="field.type === 'number'" class="relative">
                     <input
                       type="number"
                       [ngModel]="formValues[field.key]"
                       (ngModelChange)="onFieldChange(field.key, $event)"
                       [step]="field.step || '1'"
-                      [min]="field.min"
-                      [max]="field.max"
+                      [min]="field.min ?? 0"
+                      [max]="field.max ?? 0"
                       class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-dark-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-stellar-blue/50"
                     />
                   </div>
@@ -78,9 +97,13 @@ import { LucideAngularModule, Save, RotateCcw, Settings } from 'lucide-angular';
                       max="100"
                       class="w-full px-3 py-2 pr-8 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-dark-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-stellar-blue/50"
                     />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400"
+                      >%</span
+                    >
                   </div>
-                  <p *ngIf="field.description" class="text-xs text-slate-400">{{ field.description }}</p>
+                  <p *ngIf="field.description" class="text-xs text-slate-400">
+                    {{ field.description }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -88,7 +111,7 @@ import { LucideAngularModule, Save, RotateCcw, Settings } from 'lucide-angular';
         </div>
       </ng-container>
     </div>
-  `
+  `,
 })
 export class AdminFeesComponent implements OnInit {
   protected loading = true;
@@ -109,14 +132,57 @@ export class AdminFeesComponent implements OnInit {
     max?: number;
     description?: string;
   }> = [
-    { key: 'protocolFee', label: 'Protocol Fee', type: 'percentage', description: 'Fee percentage charged on credit transactions' },
-    { key: 'voteDuration', label: 'Vote Duration', type: 'number', description: 'Duration in seconds for governance votes' },
-    { key: 'timelockDuration', label: 'Timelock Duration', type: 'number', description: 'Delay in seconds before execution after approval' },
-    { key: 'quorumThreshold', label: 'Quorum Threshold', type: 'percentage', description: 'Minimum percentage of votes required for quorum' },
-    { key: 'minOracleThreshold', label: 'Min Oracle Threshold', type: 'number', description: 'Minimum number of oracles required for validation' },
-    { key: 'qualityPenaltyWeight', label: 'Quality Penalty Weight', type: 'number', step: '0.01', description: 'Weight applied for quality penalties' },
-    { key: 'nRemovalWeight', label: 'N Removal Weight', type: 'number', step: '0.01', description: 'Weight for nitrogen removal calculations' },
-    { key: 'pRemovalWeight', label: 'P Removal Weight', type: 'number', step: '0.01', description: 'Weight for phosphorus removal calculations' },
+    {
+      key: 'protocolFee',
+      label: 'Protocol Fee',
+      type: 'percentage',
+      description: 'Fee percentage charged on credit transactions',
+    },
+    {
+      key: 'voteDuration',
+      label: 'Vote Duration',
+      type: 'number',
+      description: 'Duration in seconds for governance votes',
+    },
+    {
+      key: 'timelockDuration',
+      label: 'Timelock Duration',
+      type: 'number',
+      description: 'Delay in seconds before execution after approval',
+    },
+    {
+      key: 'quorumThreshold',
+      label: 'Quorum Threshold',
+      type: 'percentage',
+      description: 'Minimum percentage of votes required for quorum',
+    },
+    {
+      key: 'minOracleThreshold',
+      label: 'Min Oracle Threshold',
+      type: 'number',
+      description: 'Minimum number of oracles required for validation',
+    },
+    {
+      key: 'qualityPenaltyWeight',
+      label: 'Quality Penalty Weight',
+      type: 'number',
+      step: '0.01',
+      description: 'Weight applied for quality penalties',
+    },
+    {
+      key: 'nRemovalWeight',
+      label: 'N Removal Weight',
+      type: 'number',
+      step: '0.01',
+      description: 'Weight for nitrogen removal calculations',
+    },
+    {
+      key: 'pRemovalWeight',
+      label: 'P Removal Weight',
+      type: 'number',
+      step: '0.01',
+      description: 'Weight for phosphorus removal calculations',
+    },
   ];
 
   constructor(
@@ -137,7 +203,8 @@ export class AdminFeesComponent implements OnInit {
     const val = (this.currentConfig as any)[field.key];
     if (val === undefined || val === null) return '-';
     if (field.type === 'percentage') return `${val}%`;
-    if (field.key === 'voteDuration' || field.key === 'timelockDuration') return this.formatDuration(val);
+    if (field.key === 'voteDuration' || field.key === 'timelockDuration')
+      return this.formatDuration(val);
     return String(val);
   }
 
@@ -173,7 +240,10 @@ export class AdminFeesComponent implements OnInit {
         return;
       }
       await this.governanceService.updateConfig(changed as Partial<GovernanceConfig>);
-      this.notification.success('Configuration Updated', 'Governance configuration has been saved successfully.');
+      this.notification.success(
+        'Configuration Updated',
+        'Governance configuration has been saved successfully.',
+      );
       await this.loadConfig();
     } catch (error) {
       console.error('Failed to save config:', error);

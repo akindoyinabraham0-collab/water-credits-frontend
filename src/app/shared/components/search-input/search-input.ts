@@ -10,7 +10,10 @@ import { LucideAngularModule, Search, X } from 'lucide-angular';
   imports: [FormsModule, NgIf, LucideAngularModule],
   template: `
     <div class="relative">
-      <lucide-angular [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-angular>
+      <lucide-angular
+        [img]="SearchIcon"
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+      ></lucide-angular>
       <input
         [ngModel]="value"
         (ngModelChange)="onInput($event)"
@@ -18,16 +21,20 @@ import { LucideAngularModule, Search, X } from 'lucide-angular';
         [placeholder]="placeholder"
         class="input pl-10 pr-10"
       />
-      <button *ngIf="value" (click)="clear()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+      <button
+        *ngIf="value"
+        (click)="clear()"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+      >
         <lucide-angular [img]="XIcon" class="w-4 h-4"></lucide-angular>
       </button>
     </div>
-  `
+  `,
 })
 export class SearchInputComponent implements OnInit, OnDestroy {
-  @Input() value: string = '';
-  @Input() placeholder: string = 'Search...';
-  @Input() debounceMs: number = 300;
+  @Input() value = '';
+  @Input() placeholder = 'Search...';
+  @Input() debounceMs = 300;
   @Output() valueChange = new EventEmitter<string>();
   @Output() search = new EventEmitter<string>();
 
@@ -38,12 +45,11 @@ export class SearchInputComponent implements OnInit, OnDestroy {
   private subscription?: Subscription;
 
   ngOnInit(): void {
-    this.subscription = this.searchSubject.pipe(
-      debounceTime(this.debounceMs),
-      distinctUntilChanged()
-    ).subscribe(value => {
-      this.search.emit(value);
-    });
+    this.subscription = this.searchSubject
+      .pipe(debounceTime(this.debounceMs), distinctUntilChanged())
+      .subscribe((value) => {
+        this.search.emit(value);
+      });
   }
 
   ngOnDestroy(): void {

@@ -8,18 +8,40 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { NotificationService } from '../../../core/services/notification.service';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { Project, ProjectCreate } from '../../../core/models/project.model';
-import { LucideAngularModule, Plus, MapPin, Sprout, X, ChevronRight, Crop, Ruler, Calendar, Globe } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Plus,
+  MapPin,
+  Sprout,
+  X,
+  ChevronRight,
+  Crop,
+  Ruler,
+  Calendar,
+  Globe,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-farmer-parcels',
   standalone: true,
-  imports: [RouterLink, FormsModule, NgIf, NgFor, NgClass, StatusBadgeComponent, EmptyStateComponent, LucideAngularModule],
+  imports: [
+    RouterLink,
+    FormsModule,
+    NgIf,
+    NgFor,
+    NgClass,
+    StatusBadgeComponent,
+    EmptyStateComponent,
+    LucideAngularModule,
+  ],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">My Parcels</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your farmland parcels and water credit projects</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Manage your farmland parcels and water credit projects
+          </p>
         </div>
         <button (click)="showForm = !showForm" class="btn btn-primary flex items-center gap-2">
           <lucide-angular [img]="showForm ? X : Plus" class="w-4 h-4"></lucide-angular>
@@ -28,27 +50,58 @@ import { LucideAngularModule, Plus, MapPin, Sprout, X, ChevronRight, Crop, Ruler
       </div>
 
       <div *ngIf="showForm" class="card p-6 border border-stellar-blue/20">
-        <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Register New Parcel</h2>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+          Register New Parcel
+        </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="md:col-span-2">
             <label class="label">Parcel Name *</label>
-            <input type="text" [(ngModel)]="form.name" class="input" placeholder="e.g., North Field" />
+            <input
+              type="text"
+              [(ngModel)]="form.name"
+              class="input"
+              placeholder="e.g., North Field"
+            />
           </div>
           <div class="md:col-span-2">
             <label class="label">Description *</label>
-            <textarea [(ngModel)]="form.description" class="input min-h-[80px]" placeholder="Describe soil type, crops, and practices..." required></textarea>
+            <textarea
+              [(ngModel)]="form.description"
+              class="input min-h-[80px]"
+              placeholder="Describe soil type, crops, and practices..."
+              required
+            ></textarea>
           </div>
           <div>
             <label class="label">Latitude *</label>
-            <input type="number" [(ngModel)]="form.latitude" class="input" placeholder="e.g., 41.403" step="any" />
+            <input
+              type="number"
+              [(ngModel)]="form.latitude"
+              class="input"
+              placeholder="e.g., 41.403"
+              step="any"
+            />
           </div>
           <div>
             <label class="label">Longitude *</label>
-            <input type="number" [(ngModel)]="form.longitude" class="input" placeholder="e.g., 2.174" step="any" />
+            <input
+              type="number"
+              [(ngModel)]="form.longitude"
+              class="input"
+              placeholder="e.g., 2.174"
+              step="any"
+            />
           </div>
           <div>
             <label class="label">Area (hectares) *</label>
-            <input type="number" [(ngModel)]="form.areaHectares" class="input" placeholder="e.g., 50" min="0" step="0.01" />
+            <input
+              type="number"
+              [(ngModel)]="form.areaHectares"
+              class="input"
+              placeholder="e.g., 50"
+              min="0"
+              step="0.01"
+            />
           </div>
           <div>
             <label class="label">Crop Type</label>
@@ -83,21 +136,46 @@ import { LucideAngularModule, Plus, MapPin, Sprout, X, ChevronRight, Crop, Ruler
           </div>
         </div>
 
-        <div class="mt-4 p-4 bg-slate-50 dark:bg-dark-bg rounded-lg border border-dashed border-slate-300 dark:border-slate-600">
+        <div
+          class="mt-4 p-4 bg-slate-50 dark:bg-dark-bg rounded-lg border border-dashed border-slate-300 dark:border-slate-600"
+        >
           <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
             <lucide-angular [img]="MapPin" class="w-4 h-4"></lucide-angular>
             <span>Map Boundary (Optional)</span>
           </div>
-          <div class="h-40 bg-slate-100 dark:bg-dark-bg-lighter rounded flex items-center justify-center text-xs text-slate-400">
+          <div
+            class="h-40 bg-slate-100 dark:bg-dark-bg-lighter rounded flex items-center justify-center text-xs text-slate-400"
+          >
             Leaflet map placeholder &mdash; draw polygon to define parcel boundary
           </div>
         </div>
 
         <div class="flex justify-end mt-4">
-          <button (click)="saveParcel()" [disabled]="saving" class="btn btn-primary flex items-center gap-2">
-            <svg *ngIf="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          <button
+            (click)="saveParcel()"
+            [disabled]="saving"
+            class="btn btn-primary flex items-center gap-2"
+          >
+            <svg
+              *ngIf="saving"
+              class="animate-spin w-4 h-4"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
             </svg>
             {{ saving ? 'Registering...' : 'Register Parcel' }}
           </button>
@@ -105,7 +183,9 @@ import { LucideAngularModule, Plus, MapPin, Sprout, X, ChevronRight, Crop, Ruler
       </div>
 
       <div *ngIf="loading" class="flex items-center justify-center py-20">
-        <div class="animate-spin w-8 h-8 border-2 border-stellar-blue border-t-transparent rounded-full"></div>
+        <div
+          class="animate-spin w-8 h-8 border-2 border-stellar-blue border-t-transparent rounded-full"
+        ></div>
       </div>
 
       <ng-container *ngIf="!loading">
@@ -118,8 +198,15 @@ import { LucideAngularModule, Plus, MapPin, Sprout, X, ChevronRight, Crop, Ruler
           ></app-empty-state>
         </div>
 
-        <div *ngIf="parcels.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <div *ngFor="let parcel of parcels" (click)="goToParcel(parcel)" class="card p-5 cursor-pointer hover:shadow-lg transition-shadow">
+        <div
+          *ngIf="parcels.length > 0"
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+        >
+          <div
+            *ngFor="let parcel of parcels"
+            (click)="goToParcel(parcel)"
+            class="card p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          >
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-stellar-blue/10 flex items-center justify-center">
@@ -129,27 +216,37 @@ import { LucideAngularModule, Plus, MapPin, Sprout, X, ChevronRight, Crop, Ruler
               </div>
               <app-status-badge [status]="parcel.status"></app-status-badge>
             </div>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">{{ parcel.description }}</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">
+              {{ parcel.description }}
+            </p>
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div class="flex items-center gap-1">
                 <lucide-angular [img]="Ruler" class="w-3 h-3 text-slate-400"></lucide-angular>
                 <span class="text-slate-400">Area:</span>
-                <span class="font-medium text-slate-700 dark:text-slate-300">{{ parcel.areaHectares }} ha</span>
+                <span class="font-medium text-slate-700 dark:text-slate-300"
+                  >{{ parcel.areaHectares }} ha</span
+                >
               </div>
               <div class="flex items-center gap-1">
                 <lucide-angular [img]="Crop" class="w-3 h-3 text-slate-400"></lucide-angular>
                 <span class="text-slate-400">Methodology:</span>
-                <span class="font-medium text-slate-700 dark:text-slate-300">{{ parcel.methodology }}</span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">{{
+                  parcel.methodology
+                }}</span>
               </div>
               <div class="flex items-center gap-1">
                 <lucide-angular [img]="Globe" class="w-3 h-3 text-slate-400"></lucide-angular>
                 <span class="text-slate-400">Location:</span>
-                <span class="font-medium text-slate-700 dark:text-slate-300">{{ parcel.latitude.toFixed(3) }}, {{ parcel.longitude.toFixed(3) }}</span>
+                <span class="font-medium text-slate-700 dark:text-slate-300"
+                  >{{ parcel.latitude.toFixed(3) }}, {{ parcel.longitude.toFixed(3) }}</span
+                >
               </div>
               <div class="flex items-center gap-1">
                 <lucide-angular [img]="Calendar" class="w-3 h-3 text-slate-400"></lucide-angular>
                 <span class="text-slate-400">Baseline:</span>
-                <span class="font-medium text-slate-700 dark:text-slate-300">{{ parcel.baselineStart?.split('T')[0] }}</span>
+                <span class="font-medium text-slate-700 dark:text-slate-300">{{
+                  (parcel.baselineStart ?? '').split('T')[0]
+                }}</span>
               </div>
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-end">
@@ -169,7 +266,7 @@ export class FarmerParcelsComponent implements OnInit, OnDestroy {
   protected saving = false;
   protected showForm = false;
   protected parcels: Project[] = [];
-  protected selectedCrop: string = '';
+  protected selectedCrop = '';
   private destroy$ = new Subject<void>();
 
   protected form: ProjectCreate = {
@@ -224,20 +321,42 @@ export class FarmerParcelsComponent implements OnInit, OnDestroy {
   }
 
   async saveParcel(): Promise<void> {
-    if (!this.form.name || !this.form.description || !this.form.methodology || !this.form.baselineStart || !this.form.baselineEnd || this.form.areaHectares <= 0) {
+    if (
+      !this.form.name ||
+      !this.form.description ||
+      !this.form.methodology ||
+      !this.form.baselineStart ||
+      !this.form.baselineEnd ||
+      this.form.areaHectares <= 0
+    ) {
       this.notificationService.warning('Incomplete form', 'Please fill in all required fields');
       return;
     }
     this.saving = true;
     try {
       const project = await this.projectsService.createProject(this.form);
-      this.notificationService.success('Parcel registered', `${project.name} has been registered successfully`);
+      this.notificationService.success(
+        'Parcel registered',
+        `${project.name} has been registered successfully`,
+      );
       this.parcels.unshift(project);
       this.showForm = false;
-      this.form = { name: '', description: '', latitude: 0, longitude: 0, methodology: '', areaHectares: 0, baselineStart: '', baselineEnd: '' };
+      this.form = {
+        name: '',
+        description: '',
+        latitude: 0,
+        longitude: 0,
+        methodology: '',
+        areaHectares: 0,
+        baselineStart: '',
+        baselineEnd: '',
+      };
       this.selectedCrop = '';
     } catch (error: any) {
-      this.notificationService.error('Failed to register parcel', error.message || 'An error occurred');
+      this.notificationService.error(
+        'Failed to register parcel',
+        error.message || 'An error occurred',
+      );
     } finally {
       this.saving = false;
     }

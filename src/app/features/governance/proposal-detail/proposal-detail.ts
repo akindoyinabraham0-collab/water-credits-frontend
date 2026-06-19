@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { NgIf, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LucideAngularModule, ArrowLeft, ThumbsUp, ThumbsDown, CheckCircle, Clock, User, FileText } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  ArrowLeft,
+  ThumbsUp,
+  ThumbsDown,
+  CheckCircle,
+  Clock,
+  User,
+} from 'lucide-angular';
 import { GovernanceService } from '../../../core/services/governance.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
@@ -16,14 +24,23 @@ import { Proposal, ProposalStatus, ProposalActionType } from '../../../core/mode
   selector: 'app-proposal-detail',
   standalone: true,
   imports: [
-    NgIf, NgClass, RouterLink,
+    NgIf,
+    NgClass,
+    RouterLink,
     LucideAngularModule,
-    StatusBadgeComponent, LoadingSpinnerComponent,
-    DateFormatPipe, DurationPipe, StellarAddressPipe, NumberAbbreviatePipe,
+    StatusBadgeComponent,
+    LoadingSpinnerComponent,
+    DateFormatPipe,
+    DurationPipe,
+    StellarAddressPipe,
+    NumberAbbreviatePipe,
   ],
   template: `
     <div class="max-w-3xl mx-auto space-y-6">
-      <a routerLink="/governance" class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+      <a
+        routerLink="/governance"
+        class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+      >
         <lucide-angular [img]="ArrowLeftIcon" class="w-4 h-4"></lucide-angular>
         Back to Governance
       </a>
@@ -41,10 +58,14 @@ import { Proposal, ProposalStatus, ProposalActionType } from '../../../core/mode
           <div class="flex items-start justify-between gap-4 mb-4">
             <div>
               <div class="flex items-center gap-2 mb-2">
-                <h1 class="text-xl font-bold text-slate-900 dark:text-white">{{ proposal.title }}</h1>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">
+                  {{ proposal.title }}
+                </h1>
                 <app-status-badge [status]="proposal.status"></app-status-badge>
               </div>
-              <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+              <div
+                class="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400"
+              >
                 <span class="inline-flex items-center gap-1.5">
                   <lucide-angular [img]="UserIcon" class="w-4 h-4"></lucide-angular>
                   {{ proposal.proposerName || (proposal.proposerId | stellarAddress) }}
@@ -53,33 +74,48 @@ import { Proposal, ProposalStatus, ProposalActionType } from '../../../core/mode
                   <lucide-angular [img]="ClockIcon" class="w-4 h-4"></lucide-angular>
                   Deadline {{ proposal.deadline | duration }}
                 </span>
-                <span>{{ proposal.createdAt | dateFormat:'short' }}</span>
+                <span>{{ proposal.createdAt | dateFormat: 'short' }}</span>
               </div>
             </div>
           </div>
 
           <div class="mb-6">
             <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Description</h3>
-            <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{ proposal.description }}</p>
+            <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+              {{ proposal.description }}
+            </p>
           </div>
 
           <div class="grid grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
             <div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Action Type</p>
-              <p class="font-medium text-slate-900 dark:text-white capitalize">{{ formatActionType(proposal.actionType) }}</p>
+              <p class="font-medium text-slate-900 dark:text-white capitalize">
+                {{ formatActionType(proposal.actionType) }}
+              </p>
             </div>
             <div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Created</p>
-              <p class="font-medium text-slate-900 dark:text-white">{{ proposal.createdAt | dateFormat }}</p>
+              <p class="font-medium text-slate-900 dark:text-white">
+                {{ proposal.createdAt | dateFormat }}
+              </p>
             </div>
           </div>
 
-          <div *ngIf="proposal.actionParams && getActionParamKeys(proposal).length > 0" class="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-            <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">Action Parameters</h3>
+          <div
+            *ngIf="proposal.actionParams && getActionParamKeys(proposal).length > 0"
+            class="mt-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+          >
+            <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
+              Action Parameters
+            </h3>
             <div class="space-y-2">
               <div *ngFor="let key of getActionParamKeys(proposal)" class="text-sm">
-                <span class="text-slate-500 dark:text-slate-400 capitalize">{{ formatParamKey(key) }}:</span>
-                <span class="ml-2 text-slate-900 dark:text-white font-medium">{{ proposal.actionParams[key] }}</span>
+                <span class="text-slate-500 dark:text-slate-400 capitalize"
+                  >{{ formatParamKey(key) }}:</span
+                >
+                <span class="ml-2 text-slate-900 dark:text-white font-medium">{{
+                  proposal.actionParams[key]
+                }}</span>
               </div>
             </div>
           </div>
@@ -88,20 +124,29 @@ import { Proposal, ProposalStatus, ProposalActionType } from '../../../core/mode
         <div class="card p-6">
           <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Vote Breakdown</h3>
           <div class="flex items-center gap-3 mb-2">
-            <div class="flex-1 h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden flex">
+            <div
+              class="flex-1 h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden flex"
+            >
               <div class="h-full bg-green-500 transition-all" [style.width.%]="forPercentage"></div>
-              <div class="h-full bg-red-500 transition-all" [style.width.%]="againstPercentage"></div>
+              <div
+                class="h-full bg-red-500 transition-all"
+                [style.width.%]="againstPercentage"
+              ></div>
             </div>
           </div>
           <div class="flex justify-between text-sm">
             <div class="flex items-center gap-1.5">
               <lucide-angular [img]="ThumbsUpIcon" class="w-4 h-4 text-green-500"></lucide-angular>
-              <span class="font-medium text-slate-900 dark:text-white">{{ proposal.votesFor | numberAbbreviate }}</span>
+              <span class="font-medium text-slate-900 dark:text-white">{{
+                proposal.votesFor | numberAbbreviate
+              }}</span>
               <span class="text-slate-500 dark:text-slate-400">for</span>
             </div>
             <div class="flex items-center gap-1.5">
               <lucide-angular [img]="ThumbsDownIcon" class="w-4 h-4 text-red-500"></lucide-angular>
-              <span class="font-medium text-slate-900 dark:text-white">{{ proposal.votesAgainst | numberAbbreviate }}</span>
+              <span class="font-medium text-slate-900 dark:text-white">{{
+                proposal.votesAgainst | numberAbbreviate
+              }}</span>
               <span class="text-slate-500 dark:text-slate-400">against</span>
             </div>
           </div>
@@ -110,11 +155,19 @@ import { Proposal, ProposalStatus, ProposalActionType } from '../../../core/mode
         <div *ngIf="canVote" class="card p-6">
           <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Cast Your Vote</h3>
           <div class="flex items-center gap-3">
-            <button (click)="castVote('for')" [disabled]="voting" class="btn btn-success inline-flex items-center gap-2">
+            <button
+              (click)="castVote('for')"
+              [disabled]="voting"
+              class="btn btn-success inline-flex items-center gap-2"
+            >
               <lucide-angular [img]="ThumbsUpIcon" class="w-4 h-4"></lucide-angular>
               Vote For
             </button>
-            <button (click)="castVote('against')" [disabled]="voting" class="btn btn-danger inline-flex items-center gap-2">
+            <button
+              (click)="castVote('against')"
+              [disabled]="voting"
+              class="btn btn-danger inline-flex items-center gap-2"
+            >
               <lucide-angular [img]="ThumbsDownIcon" class="w-4 h-4"></lucide-angular>
               Vote Against
             </button>
@@ -124,15 +177,21 @@ import { Proposal, ProposalStatus, ProposalActionType } from '../../../core/mode
 
         <div *ngIf="canExecute" class="card p-6">
           <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4">Execution</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">This proposal has been approved and is ready for execution.</p>
-          <button (click)="executeProposal()" [disabled]="executing" class="btn btn-primary inline-flex items-center gap-2">
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            This proposal has been approved and is ready for execution.
+          </p>
+          <button
+            (click)="executeProposal()"
+            [disabled]="executing"
+            class="btn btn-primary inline-flex items-center gap-2"
+          >
             <lucide-angular [img]="CheckCircleIcon" class="w-4 h-4"></lucide-angular>
             {{ executing ? 'Executing...' : 'Execute Proposal' }}
           </button>
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class ProposalDetailComponent implements OnInit {
   protected readonly ArrowLeftIcon = ArrowLeft;
@@ -188,7 +247,10 @@ export class ProposalDetailComponent implements OnInit {
   }
 
   get canVote(): boolean {
-    return this.proposal?.status === ProposalStatus.PENDING || this.proposal?.status === ProposalStatus.ACTIVE;
+    return (
+      this.proposal?.status === ProposalStatus.PENDING ||
+      this.proposal?.status === ProposalStatus.ACTIVE
+    );
   }
 
   get canExecute(): boolean {
@@ -200,7 +262,10 @@ export class ProposalDetailComponent implements OnInit {
   }
 
   formatParamKey(key: string): string {
-    return key.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+    return key
+      .replace(/_/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
   }
 
   formatActionType(type: ProposalActionType): string {

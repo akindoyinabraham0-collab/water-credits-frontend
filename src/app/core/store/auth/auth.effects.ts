@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of, from } from 'rxjs';
-import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import * as AuthActions from './auth.actions';
 import { AuthService } from '../../services/auth.service';
@@ -28,38 +27,47 @@ export class AuthEffects {
         } catch (error: any) {
           return AuthActions.loginFailure({ error: error.message || 'Login failed' });
         }
-      })
-    )
+      }),
+    ),
   );
 
-  loginSuccess$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.loginSuccess),
-      tap(({ user }) => {
-        this.notificationService.success('Welcome!', `Signed in as ${user.displayName || user.wallet}`);
-        this.router.navigateByUrl('/dashboard');
-      })
-    ), { dispatch: false }
+  loginSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.loginSuccess),
+        tap(({ user }) => {
+          this.notificationService.success(
+            'Welcome!',
+            `Signed in as ${user.displayName || user.wallet}`,
+          );
+          this.router.navigateByUrl('/dashboard');
+        }),
+      ),
+    { dispatch: false },
   );
 
-  loginFailure$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.loginFailure),
-      tap(({ error }) => {
-        this.notificationService.error('Login failed', error);
-      })
-    ), { dispatch: false }
+  loginFailure$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.loginFailure),
+        tap(({ error }) => {
+          this.notificationService.error('Login failed', error);
+        }),
+      ),
+    { dispatch: false },
   );
 
-  logout$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.logout),
-      tap(() => {
-        this.authService.logout();
-        this.notificationService.info('Logged out', 'You have been signed out');
-        this.router.navigateByUrl('/auth/login');
-      })
-    ), { dispatch: false }
+  logout$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.logout),
+        tap(() => {
+          this.authService.logout();
+          this.notificationService.info('Logged out', 'You have been signed out');
+          this.router.navigateByUrl('/auth/login');
+        }),
+      ),
+    { dispatch: false },
   );
 
   getCurrentUser$ = createEffect(() =>
@@ -70,10 +78,12 @@ export class AuthEffects {
           const user = await this.authService.getCurrentUser();
           return AuthActions.getCurrentUserSuccess({ user });
         } catch (error: any) {
-          return AuthActions.getCurrentUserFailure({ error: error.message || 'Failed to fetch user' });
+          return AuthActions.getCurrentUserFailure({
+            error: error.message || 'Failed to fetch user',
+          });
         }
-      })
-    )
+      }),
+    ),
   );
 
   constructor(

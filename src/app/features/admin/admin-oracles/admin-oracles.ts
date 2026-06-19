@@ -21,13 +21,28 @@ interface OracleEntry {
 @Component({
   selector: 'app-admin-oracles',
   standalone: true,
-  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, FormsModule, StellarAddressPipe, DateFormatPipe, DataTableComponent, StatusBadgeComponent, ConfirmDialogComponent, LucideAngularModule],
+  imports: [
+    NgIf,
+    NgFor,
+    NgSwitch,
+    NgSwitchCase,
+    NgSwitchDefault,
+    FormsModule,
+    StellarAddressPipe,
+    DateFormatPipe,
+    DataTableComponent,
+    StatusBadgeComponent,
+    ConfirmDialogComponent,
+    LucideAngularModule,
+  ],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Oracle Management</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage oracle nodes and monitor submissions</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Manage oracle nodes and monitor submissions
+          </p>
         </div>
         <div class="flex items-center gap-2">
           <button (click)="refresh()" class="btn btn-outline flex items-center gap-2">
@@ -40,28 +55,50 @@ interface OracleEntry {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
           <div class="card p-5">
-            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Registered Oracles</h3>
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
+              Registered Oracles
+            </h3>
             <div *ngIf="loading" class="flex items-center justify-center py-12">
-              <div class="animate-spin w-8 h-8 border-2 border-stellar-blue border-t-transparent rounded-full"></div>
+              <div
+                class="animate-spin w-8 h-8 border-2 border-stellar-blue border-t-transparent rounded-full"
+              ></div>
             </div>
             <ng-container *ngIf="!loading">
               <div *ngIf="oracles.length === 0" class="text-center py-12">
-                <lucide-angular [img]="HardDrive" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"></lucide-angular>
+                <lucide-angular
+                  [img]="HardDrive"
+                  class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3"
+                ></lucide-angular>
                 <p class="text-sm text-slate-500 dark:text-slate-400">No oracles registered yet</p>
               </div>
-              <div *ngFor="let oracle of oracles; let i = index" class="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700 last:border-0">
+              <div
+                *ngFor="let oracle of oracles; let i = index"
+                class="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700 last:border-0"
+              >
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-credit-gold/10 flex items-center justify-center">
-                    <lucide-angular [img]="HardDrive" class="w-4 h-4 text-credit-gold"></lucide-angular>
+                  <div
+                    class="w-8 h-8 rounded-lg bg-credit-gold/10 flex items-center justify-center"
+                  >
+                    <lucide-angular
+                      [img]="HardDrive"
+                      class="w-4 h-4 text-credit-gold"
+                    ></lucide-angular>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ oracle.address | stellarAddress:8 }}</p>
-                    <p class="text-xs text-slate-400">Last: {{ oracle.lastSubmission | dateFormat:'relative' }}</p>
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      {{ oracle.address | stellarAddress: 8 }}
+                    </p>
+                    <p class="text-xs text-slate-400">
+                      Last: {{ oracle.lastSubmission | dateFormat: 'relative' }}
+                    </p>
                   </div>
                 </div>
                 <div class="flex items-center gap-3">
                   <app-status-badge [status]="oracle.status"></app-status-badge>
-                  <button (click)="confirmRemove(oracle)" class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                  <button
+                    (click)="confirmRemove(oracle)"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
                     <lucide-angular [img]="Trash2" class="w-4 h-4"></lucide-angular>
                   </button>
                 </div>
@@ -72,14 +109,20 @@ interface OracleEntry {
 
         <div>
           <div class="card p-5">
-            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Add Oracle</h3>
+            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
+              Add Oracle
+            </h3>
             <div class="space-y-3">
               <input
                 [(ngModel)]="newOracleAddress"
                 placeholder="G... or oracle address"
                 class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-dark-bg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-stellar-blue/50"
               />
-              <button (click)="addOracle()" [disabled]="!newOracleAddress.trim()" class="btn btn-primary w-full flex items-center justify-center gap-2">
+              <button
+                (click)="addOracle()"
+                [disabled]="!newOracleAddress.trim()"
+                class="btn btn-primary w-full flex items-center justify-center gap-2"
+              >
                 <lucide-angular [img]="Plus" class="w-4 h-4"></lucide-angular>
                 Add Oracle
               </button>
@@ -91,7 +134,9 @@ interface OracleEntry {
             <div class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <span class="text-slate-500 dark:text-slate-400">Total Oracles</span>
-                <span class="font-semibold text-slate-700 dark:text-slate-300">{{ oracles.length }}</span>
+                <span class="font-semibold text-slate-700 dark:text-slate-300">{{
+                  oracles.length
+                }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-500 dark:text-slate-400">Confirmed</span>
@@ -111,7 +156,9 @@ interface OracleEntry {
       </div>
 
       <div class="card p-5">
-        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Submission History</h3>
+        <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
+          Submission History
+        </h3>
         <app-data-table
           [columns]="submissionColumns"
           [data]="submissions"
@@ -130,7 +177,7 @@ interface OracleEntry {
               <span *ngSwitchCase="'status'">
                 <app-status-badge [status]="row.status"></app-status-badge>
               </span>
-              <span *ngSwitchCase="'createdAt'">{{ row.createdAt | dateFormat:'relative' }}</span>
+              <span *ngSwitchCase="'createdAt'">{{ row.createdAt | dateFormat: 'relative' }}</span>
               <span *ngSwitchDefault>{{ row[col.key] }}</span>
             </ng-container>
           </ng-template>
@@ -141,20 +188,24 @@ interface OracleEntry {
     <app-confirm-dialog
       *ngIf="showRemoveDialog"
       title="Remove Oracle"
-      [message]="'Are you sure you want to remove oracle ' + (oracleToRemove?.address | stellarAddress) + '?'"
+      [message]="
+        'Are you sure you want to remove oracle ' +
+        (oracleToRemove?.address ?? '' | stellarAddress) +
+        '?'
+      "
       confirmLabel="Remove"
       confirmVariant="danger"
       (confirm)="removeOracle()"
       (cancel)="showRemoveDialog = false"
     />
-  `
+  `,
 })
 export class AdminOraclesComponent implements OnInit {
   protected loading = true;
   protected submissionsLoading = false;
   protected oracles: OracleEntry[] = [];
   protected submissions: OracleSubmission[] = [];
-  protected newOracleAddress: string = '';
+  protected newOracleAddress = '';
   protected showRemoveDialog = false;
   protected oracleToRemove: OracleEntry | null = null;
   protected page = 1;
@@ -184,15 +235,15 @@ export class AdminOraclesComponent implements OnInit {
   }
 
   get confirmedCount(): number {
-    return this.oracles.filter(o => o.status === 'confirmed').length;
+    return this.oracles.filter((o) => o.status === 'confirmed').length;
   }
 
   get pendingCount(): number {
-    return this.oracles.filter(o => o.status === 'pending').length;
+    return this.oracles.filter((o) => o.status === 'pending').length;
   }
 
   get failedCount(): number {
-    return this.oracles.filter(o => o.status === 'failed').length;
+    return this.oracles.filter((o) => o.status === 'failed').length;
   }
 
   async refresh(): Promise<void> {
@@ -202,7 +253,10 @@ export class AdminOraclesComponent implements OnInit {
   async addOracle(): Promise<void> {
     const address = this.newOracleAddress.trim();
     if (!address) return;
-    this.notification.success('Oracle Added', `Oracle ${address.substring(0, 8)}... has been registered.`);
+    this.notification.success(
+      'Oracle Added',
+      `Oracle ${address.substring(0, 8)}... has been registered.`,
+    );
     this.newOracleAddress = '';
     await this.loadData();
   }
@@ -214,7 +268,10 @@ export class AdminOraclesComponent implements OnInit {
 
   async removeOracle(): Promise<void> {
     if (!this.oracleToRemove) return;
-    this.notification.success('Oracle Removed', `Oracle ${this.oracleToRemove.address.substring(0, 8)}... has been removed.`);
+    this.notification.success(
+      'Oracle Removed',
+      `Oracle ${this.oracleToRemove.address.substring(0, 8)}... has been removed.`,
+    );
     this.showRemoveDialog = false;
     this.oracleToRemove = null;
     await this.loadData();

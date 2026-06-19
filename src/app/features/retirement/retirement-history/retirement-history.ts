@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NgIf, NgFor } from '@angular/common';
+import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Plus, FileText } from 'lucide-angular';
 import { RetirementService } from '../../../core/services/retirement.service';
@@ -13,17 +13,26 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
   selector: 'app-retirement-history',
   standalone: true,
   imports: [
-    NgIf, NgFor, RouterLink,
+    NgIf,
+    NgFor,
+    NgSwitch,
+    NgSwitchCase,
+    NgSwitchDefault,
+    RouterLink,
     LucideAngularModule,
-    DataTableComponent, StatusBadgeComponent,
-    CreditAmountPipe, DateFormatPipe,
+    DataTableComponent,
+    StatusBadgeComponent,
+    CreditAmountPipe,
+    DateFormatPipe,
   ],
   template: `
     <div class="max-w-6xl mx-auto">
       <div class="flex items-center justify-between mb-6">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Retirement History</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">View all your retired carbon credits and download certificates.</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            View all your retired carbon credits and download certificates.
+          </p>
         </div>
         <a routerLink="/retirement/new" class="btn btn-primary flex items-center gap-2">
           <lucide-angular [img]="PlusIcon" class="w-4 h-4"></lucide-angular>
@@ -61,7 +70,11 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
               {{ row.retiredAt | dateFormat }}
             </span>
             <span *ngSwitchCase="'certificate'">
-              <a *ngIf="row.status === 'confirmed'" [routerLink]="['/retirement', row.id, 'certificate']" class="text-stellar-blue hover:text-stellar-blue-light inline-flex items-center gap-1 text-sm">
+              <a
+                *ngIf="row.status === 'confirmed'"
+                [routerLink]="['/retirement', row.id, 'certificate']"
+                class="text-stellar-blue hover:text-stellar-blue-light inline-flex items-center gap-1 text-sm"
+              >
                 <lucide-angular [img]="FileTextIcon" class="w-4 h-4"></lucide-angular>
                 Certificate
               </a>
@@ -102,7 +115,10 @@ export class RetirementHistoryComponent implements OnInit {
   private async loadRetirements(): Promise<void> {
     this.loading = true;
     try {
-      const response = await this.retirementService.getRetirements({ page: this.page, limit: this.limit });
+      const response = await this.retirementService.getRetirements({
+        page: this.page,
+        limit: this.limit,
+      });
       this.retirements = response.data;
       this.total = response.total;
       this.totalPages = response.totalPages;

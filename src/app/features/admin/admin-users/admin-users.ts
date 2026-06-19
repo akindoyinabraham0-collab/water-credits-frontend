@@ -14,13 +14,28 @@ import { LucideAngularModule, Trash2, Shield, Users } from 'lucide-angular';
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, FormsModule, StellarAddressPipe, DateFormatPipe, DataTableComponent, StatusBadgeComponent, ConfirmDialogComponent, LucideAngularModule],
+  imports: [
+    NgIf,
+    NgFor,
+    NgSwitch,
+    NgSwitchCase,
+    NgSwitchDefault,
+    FormsModule,
+    StellarAddressPipe,
+    DateFormatPipe,
+    DataTableComponent,
+    StatusBadgeComponent,
+    ConfirmDialogComponent,
+    LucideAngularModule,
+  ],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">User Management</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage user roles, KYC status, and access</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Manage user roles, KYC status, and access
+          </p>
         </div>
       </div>
 
@@ -53,7 +68,11 @@ import { LucideAngularModule, Trash2, Shield, Users } from 'lucide-angular';
             <span *ngSwitchCase="'isKycVerified'">
               <button
                 (click)="toggleKyc(user)"
-                [class]="user.isKycVerified ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-600'"
+                [class]="
+                  user.isKycVerified
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-600'
+                "
                 class="text-xs px-2.5 py-1 rounded-full border font-medium transition-colors"
               >
                 {{ user.isKycVerified ? 'Verified' : 'Unverified' }}
@@ -61,13 +80,19 @@ import { LucideAngularModule, Trash2, Shield, Users } from 'lucide-angular';
             </span>
 
             <span *ngSwitchCase="'isActive'">
-              <app-status-badge [status]="user.isActive ? 'active' : 'closed'" [label]="user.isActive ? 'Active' : 'Inactive'"></app-status-badge>
+              <app-status-badge
+                [status]="user.isActive ? 'active' : 'closed'"
+                [label]="user.isActive ? 'Active' : 'Inactive'"
+              ></app-status-badge>
             </span>
 
-            <span *ngSwitchCase="'createdAt'">{{ user.createdAt | dateFormat:'short' }}</span>
+            <span *ngSwitchCase="'createdAt'">{{ user.createdAt | dateFormat: 'short' }}</span>
 
             <span *ngSwitchCase="'actions'">
-              <button (click)="confirmDelete(user)" class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+              <button
+                (click)="confirmDelete(user)"
+                class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
                 <lucide-angular [img]="Trash2" class="w-4 h-4"></lucide-angular>
               </button>
             </span>
@@ -81,13 +106,17 @@ import { LucideAngularModule, Trash2, Shield, Users } from 'lucide-angular';
     <app-confirm-dialog
       *ngIf="showDeleteDialog"
       title="Delete User"
-      [message]="'Are you sure you want to delete user ' + (userToDelete?.displayName || userToDelete?.wallet | stellarAddress) + '? This action cannot be undone.'"
+      [message]="
+        'Are you sure you want to delete user ' +
+        (userToDelete?.displayName ?? userToDelete?.wallet ?? '' | stellarAddress) +
+        '? This action cannot be undone.'
+      "
       confirmLabel="Delete"
       confirmVariant="danger"
       (confirm)="deleteUser()"
       (cancel)="showDeleteDialog = false"
     />
-  `
+  `,
 })
 export class AdminUsersComponent implements OnInit {
   protected loading = true;
@@ -128,7 +157,10 @@ export class AdminUsersComponent implements OnInit {
     try {
       await this.usersService.updateUserRole(user.id, role);
       user.role = role as UserRole;
-      this.notification.success('Role Updated', `${user.displayName || user.wallet}'s role changed to ${role}.`);
+      this.notification.success(
+        'Role Updated',
+        `${user.displayName || user.wallet}'s role changed to ${role}.`,
+      );
     } catch (error) {
       console.error('Failed to update role:', error);
       this.notification.error('Update Failed', 'Could not update user role.');
@@ -140,7 +172,10 @@ export class AdminUsersComponent implements OnInit {
     try {
       await this.usersService.updateUserKyc(user.id, newValue);
       user.isKycVerified = newValue;
-      this.notification.success('KYC Updated', `KYC status for ${user.displayName || user.wallet} set to ${newValue ? 'verified' : 'unverified'}.`);
+      this.notification.success(
+        'KYC Updated',
+        `KYC status for ${user.displayName || user.wallet} set to ${newValue ? 'verified' : 'unverified'}.`,
+      );
     } catch (error) {
       console.error('Failed to update KYC:', error);
       this.notification.error('Update Failed', 'Could not update KYC status.');
@@ -156,7 +191,10 @@ export class AdminUsersComponent implements OnInit {
     if (!this.userToDelete) return;
     try {
       await this.usersService.deleteUser(this.userToDelete.id);
-      this.notification.success('User Deleted', `${this.userToDelete.displayName || this.userToDelete.wallet} has been deleted.`);
+      this.notification.success(
+        'User Deleted',
+        `${this.userToDelete.displayName || this.userToDelete.wallet} has been deleted.`,
+      );
       this.showDeleteDialog = false;
       this.userToDelete = null;
       await this.loadUsers();

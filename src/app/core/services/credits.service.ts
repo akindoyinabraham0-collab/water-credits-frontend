@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { CreditBalance, CreditTransaction, CreditPortfolio } from '../models/credit.model';
-import { PaginatedResponse } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class CreditsService {

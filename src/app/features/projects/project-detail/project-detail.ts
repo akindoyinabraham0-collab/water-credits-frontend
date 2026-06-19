@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { NgIf, AsyncPipe } from '@angular/common';
@@ -10,13 +10,34 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { StellarAddressPipe } from '../../../shared/pipes/stellar-address.pipe';
 import { Project } from '../../../core/models/project.model';
 import * as ProjectsActions from '../../../core/store/projects/projects.actions';
-import { selectSelectedProject, selectProjectsLoading } from '../../../core/store/projects/projects.selectors';
-import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Activity } from 'lucide-angular';
+import {
+  selectSelectedProject,
+  selectProjectsLoading,
+} from '../../../core/store/projects/projects.selectors';
+import {
+  LucideAngularModule,
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Ruler,
+  FileText,
+  Activity,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [RouterLink, NgIf, AsyncPipe, StatusBadgeComponent, LoadingSpinnerComponent, CreditAmountPipe, DateFormatPipe, StellarAddressPipe, LucideAngularModule],
+  imports: [
+    RouterLink,
+    NgIf,
+    AsyncPipe,
+    StatusBadgeComponent,
+    LoadingSpinnerComponent,
+    CreditAmountPipe,
+    DateFormatPipe,
+    StellarAddressPipe,
+    LucideAngularModule,
+  ],
   template: `
     <div *ngIf="loading$ | async" class="py-20">
       <app-loading-spinner size="lg" label="Loading project..."></app-loading-spinner>
@@ -24,7 +45,10 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
 
     <ng-container *ngIf="!(loading$ | async) && project">
       <div class="mb-6">
-        <a routerLink="/projects" class="inline-flex items-center gap-1 text-sm text-stellar-blue hover:text-stellar-blue-light mb-4">
+        <a
+          routerLink="/projects"
+          class="inline-flex items-center gap-1 text-sm text-stellar-blue hover:text-stellar-blue-light mb-4"
+        >
           <lucide-angular [img]="ArrowLeft" class="w-4 h-4"></lucide-angular>
           Back to Projects
         </a>
@@ -37,7 +61,9 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
             <p class="text-sm text-slate-500 dark:text-slate-400">{{ project.description }}</p>
           </div>
           <div class="flex gap-2">
-            <a [routerLink]="['/projects', project.id, 'edit']" class="btn btn-outline text-sm">Edit</a>
+            <a [routerLink]="['/projects', project.id, 'edit']" class="btn btn-outline text-sm"
+              >Edit</a
+            >
           </div>
         </div>
       </div>
@@ -45,7 +71,9 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
           <div class="card p-5">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Project Details</h2>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              Project Details
+            </h2>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Methodology</p>
@@ -61,15 +89,22 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
               <div>
                 <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Location</p>
                 <p class="text-sm font-medium flex items-center gap-1">
-                  <lucide-angular [img]="MapPin" class="w-3.5 h-3.5 text-slate-400"></lucide-angular>
+                  <lucide-angular
+                    [img]="MapPin"
+                    class="w-3.5 h-3.5 text-slate-400"
+                  ></lucide-angular>
                   {{ project.latitude.toFixed(4) }}, {{ project.longitude.toFixed(4) }}
                 </p>
               </div>
               <div>
                 <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Baseline Period</p>
                 <p class="text-sm font-medium flex items-center gap-1">
-                  <lucide-angular [img]="Calendar" class="w-3.5 h-3.5 text-slate-400"></lucide-angular>
-                  {{ project.baselineStart | dateFormat:'short' }} - {{ project.baselineEnd | dateFormat:'short' }}
+                  <lucide-angular
+                    [img]="Calendar"
+                    class="w-3.5 h-3.5 text-slate-400"
+                  ></lucide-angular>
+                  {{ project.baselineStart | dateFormat: 'short' }} -
+                  {{ project.baselineEnd | dateFormat: 'short' }}
                 </p>
               </div>
               <div>
@@ -78,25 +113,33 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
               </div>
               <div>
                 <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Created</p>
-                <p class="text-sm font-medium">{{ project.createdAt | dateFormat:'medium' }}</p>
+                <p class="text-sm font-medium">{{ project.createdAt | dateFormat: 'medium' }}</p>
               </div>
             </div>
           </div>
 
           <div class="card p-5">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">Credit Activity</h2>
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+              Credit Activity
+            </h2>
             <div class="grid grid-cols-3 gap-4">
               <div class="bg-slate-50 dark:bg-dark-bg rounded-lg p-4 text-center">
                 <p class="text-xs text-slate-400 mb-1">Minted</p>
-                <p class="text-xl font-bold text-stellar-blue">{{ (project.totalCreditsMinted || 0) | creditAmount }}</p>
+                <p class="text-xl font-bold text-stellar-blue">
+                  {{ project.totalCreditsMinted || 0 | creditAmount }}
+                </p>
               </div>
               <div class="bg-slate-50 dark:bg-dark-bg rounded-lg p-4 text-center">
                 <p class="text-xs text-slate-400 mb-1">Retired</p>
-                <p class="text-xl font-bold text-environmental-green">{{ (project.totalCreditsRetired || 0) | creditAmount }}</p>
+                <p class="text-xl font-bold text-environmental-green">
+                  {{ project.totalCreditsRetired || 0 | creditAmount }}
+                </p>
               </div>
               <div class="bg-slate-50 dark:bg-dark-bg rounded-lg p-4 text-center">
                 <p class="text-xs text-slate-400 mb-1">Price</p>
-                <p class="text-xl font-bold text-credit-gold">{{ project.creditPrice ? '$' + project.creditPrice : 'N/A' }}</p>
+                <p class="text-xl font-bold text-credit-gold">
+                  {{ project.creditPrice ? '$' + project.creditPrice : 'N/A' }}
+                </p>
               </div>
             </div>
           </div>
@@ -104,7 +147,9 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
 
         <div class="space-y-6">
           <div class="card p-5">
-            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+            <h3
+              class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2"
+            >
               <lucide-angular [img]="FileText" class="w-4 h-4 text-stellar-blue"></lucide-angular>
               Documents
             </h3>
@@ -112,7 +157,9 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
           </div>
 
           <div class="card p-5">
-            <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+            <h3
+              class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2"
+            >
               <lucide-angular [img]="Activity" class="w-4 h-4 text-stellar-blue"></lucide-angular>
               Recent Activity
             </h3>
@@ -121,13 +168,13 @@ import { LucideAngularModule, ArrowLeft, MapPin, Calendar, Ruler, FileText, Acti
         </div>
       </div>
     </ng-container>
-  `
+  `,
 })
 export class ProjectDetailComponent implements OnInit, OnDestroy {
   protected project: Project | null = null;
   protected loading$: Observable<boolean>;
   private destroy$ = new Subject<void>();
-  private projectId: string = '';
+  private projectId = '';
 
   protected readonly ArrowLeft = ArrowLeft;
   protected readonly MapPin = MapPin;
@@ -148,9 +195,12 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     if (this.projectId) {
       this.store.dispatch(ProjectsActions.loadProject({ id: this.projectId }));
     }
-    this.store.select(selectSelectedProject).pipe(takeUntil(this.destroy$)).subscribe(project => {
-      this.project = project;
-    });
+    this.store
+      .select(selectSelectedProject)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((project) => {
+        this.project = project;
+      });
   }
 
   ngOnDestroy(): void {

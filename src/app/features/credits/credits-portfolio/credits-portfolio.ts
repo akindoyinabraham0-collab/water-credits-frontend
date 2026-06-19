@@ -1,8 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NgIf, NgFor, AsyncPipe, NgClass } from '@angular/common';
+import {
+  NgIf,
+  NgFor,
+  AsyncPipe,
+  NgClass,
+  NgSwitch,
+  NgSwitchCase,
+  NgSwitchDefault,
+} from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, takeUntil } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { CreditsService } from '../../../core/services/credits.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CreditAmountPipe } from '../../../shared/pipes/credit-amount.pipe';
@@ -13,18 +21,46 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { DataTableComponent, ColumnDef } from '../../../shared/components/data-table/data-table';
 import { RetireCreditsModalComponent } from '../../../shared/components/retire-credits-modal/retire-credits-modal';
-import { CreditBalance, CreditPortfolio, CreditTransaction } from '../../../core/models/credit.model';
+import {
+  CreditBalance,
+  CreditPortfolio,
+  CreditTransaction,
+} from '../../../core/models/credit.model';
 import { AppState } from '../../../core/store/app.state';
 import * as CreditsActions from '../../../core/store/credits/credits.actions';
-import { LucideAngularModule, Wallet, DollarSign, PieChart, RefreshCw, Droplets, Clock, ArrowUpRight, ArrowDownRight, ArrowLeftRight } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Wallet,
+  DollarSign,
+  PieChart,
+  RefreshCw,
+  Droplets,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  ArrowLeftRight,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-credits-portfolio',
   standalone: true,
   imports: [
-    NgIf, NgFor, AsyncPipe, NgClass, RouterLink,
-    CreditAmountPipe, DateFormatPipe, StellarAddressPipe, NumberAbbreviatePipe,
-    LoadingSpinnerComponent, EmptyStateComponent, DataTableComponent, RetireCreditsModalComponent,
+    NgIf,
+    NgFor,
+    AsyncPipe,
+    NgClass,
+    NgSwitch,
+    NgSwitchCase,
+    NgSwitchDefault,
+    RouterLink,
+    CreditAmountPipe,
+    DateFormatPipe,
+    StellarAddressPipe,
+    NumberAbbreviatePipe,
+    LoadingSpinnerComponent,
+    EmptyStateComponent,
+    DataTableComponent,
+    RetireCreditsModalComponent,
     LucideAngularModule,
   ],
   template: `
@@ -32,7 +68,9 @@ import { LucideAngularModule, Wallet, DollarSign, PieChart, RefreshCw, Droplets,
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Credits Portfolio</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage your water credit holdings and retirements</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Manage your water credit holdings and retirements
+          </p>
         </div>
         <button (click)="refresh()" class="btn btn-outline text-sm flex items-center gap-2">
           <lucide-angular [img]="RefreshCwIcon" class="w-4 h-4"></lucide-angular>
@@ -49,31 +87,62 @@ import { LucideAngularModule, Wallet, DollarSign, PieChart, RefreshCw, Droplets,
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="card p-5">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Total Balance</p>
+                <p
+                  class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold"
+                >
+                  Total Balance
+                </p>
                 <div class="w-9 h-9 rounded-lg bg-stellar-blue/10 flex items-center justify-center">
-                  <lucide-angular [img]="WalletIcon" class="w-4.5 h-4.5 text-stellar-blue"></lucide-angular>
+                  <lucide-angular
+                    [img]="WalletIcon"
+                    class="w-4.5 h-4.5 text-stellar-blue"
+                  ></lucide-angular>
                 </div>
               </div>
-              <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ portfolio.totalBalance | creditAmount }}</p>
-              <p class="text-xs text-slate-400 mt-1">Across {{ portfolio.holdings?.length || 0 }} projects</p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
+                {{ portfolio.totalBalance | creditAmount }}
+              </p>
+              <p class="text-xs text-slate-400 mt-1">
+                Across {{ portfolio.holdings?.length || 0 }} projects
+              </p>
             </div>
             <div class="card p-5">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Total Value</p>
+                <p
+                  class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold"
+                >
+                  Total Value
+                </p>
                 <div class="w-9 h-9 rounded-lg bg-credit-gold/10 flex items-center justify-center">
-                  <lucide-angular [img]="DollarSignIcon" class="w-4.5 h-4.5 text-credit-gold"></lucide-angular>
+                  <lucide-angular
+                    [img]="DollarSignIcon"
+                    class="w-4.5 h-4.5 text-credit-gold"
+                  ></lucide-angular>
                 </div>
               </div>
-              <p class="text-2xl font-bold text-slate-900 dark:text-white">${{ portfolio.totalValue | numberAbbreviate }}</p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
+                $ {{ portfolio.totalValue | numberAbbreviate }}
+              </p>
             </div>
             <div class="card p-5">
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Holdings</p>
-                <div class="w-9 h-9 rounded-lg bg-environmental-green/10 flex items-center justify-center">
-                  <lucide-angular [img]="PieChartIcon" class="w-4.5 h-4.5 text-environmental-green"></lucide-angular>
+                <p
+                  class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold"
+                >
+                  Holdings
+                </p>
+                <div
+                  class="w-9 h-9 rounded-lg bg-environmental-green/10 flex items-center justify-center"
+                >
+                  <lucide-angular
+                    [img]="PieChartIcon"
+                    class="w-4.5 h-4.5 text-environmental-green"
+                  ></lucide-angular>
                 </div>
               </div>
-              <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ portfolio.holdings?.length || 0 }}</p>
+              <p class="text-2xl font-bold text-slate-900 dark:text-white">
+                {{ portfolio.holdings?.length || 0 }}
+              </p>
               <p class="text-xs text-slate-400 mt-1">Active projects</p>
             </div>
           </div>
@@ -92,12 +161,37 @@ import { LucideAngularModule, Wallet, DollarSign, PieChart, RefreshCw, Droplets,
             >
               <ng-template #row let-row let-col="column">
                 <ng-container [ngSwitch]="col.key">
-                  <a *ngSwitchCase="'projectName'" [routerLink]="['/credits', row.projectId]" class="text-sm font-medium text-slate-900 dark:text-white hover:text-stellar-blue transition-colors">{{ row.projectName }}</a>
-                  <span *ngSwitchCase="'balance'" class="text-sm text-slate-700 dark:text-slate-300 font-mono">{{ row.balance | creditAmount }}</span>
-                  <span *ngSwitchCase="'totalRetired'" class="text-sm text-slate-700 dark:text-slate-300 font-mono">{{ row.totalRetired | creditAmount }}</span>
-                  <span *ngSwitchCase="'creditPrice'" class="text-sm text-slate-700 dark:text-slate-300">${{ row.creditPrice }}</span>
-                  <span *ngSwitchCase="'value'" class="text-sm text-slate-700 dark:text-slate-300 font-semibold">${{ (parseFloat(row.balance) * row.creditPrice) | numberAbbreviate }}</span>
-                  <button *ngSwitchCase="'actions'" (click)="openRetireModal(row)" class="btn btn-sm btn-outline flex items-center gap-1.5 text-xs">
+                  <a
+                    *ngSwitchCase="'projectName'"
+                    [routerLink]="['/credits', row.projectId]"
+                    class="text-sm font-medium text-slate-900 dark:text-white hover:text-stellar-blue transition-colors"
+                    >{{ row.projectName }}</a
+                  >
+                  <span
+                    *ngSwitchCase="'balance'"
+                    class="text-sm text-slate-700 dark:text-slate-300 font-mono"
+                    >{{ row.balance | creditAmount }}</span
+                  >
+                  <span
+                    *ngSwitchCase="'totalRetired'"
+                    class="text-sm text-slate-700 dark:text-slate-300 font-mono"
+                    >{{ row.totalRetired | creditAmount }}</span
+                  >
+                  <span
+                    *ngSwitchCase="'creditPrice'"
+                    class="text-sm text-slate-700 dark:text-slate-300"
+                    >$ {{ row.creditPrice }}</span
+                  >
+                  <span
+                    *ngSwitchCase="'value'"
+                    class="text-sm text-slate-700 dark:text-slate-300 font-semibold"
+                    >$ {{ parseFloat(row.balance) * row.creditPrice | numberAbbreviate }}</span
+                  >
+                  <button
+                    *ngSwitchCase="'actions'"
+                    (click)="openRetireModal(row)"
+                    class="btn btn-sm btn-outline flex items-center gap-1.5 text-xs"
+                  >
                     <lucide-angular [img]="DropletsIcon" class="w-3.5 h-3.5"></lucide-angular>
                     Retire
                   </button>
@@ -108,30 +202,71 @@ import { LucideAngularModule, Wallet, DollarSign, PieChart, RefreshCw, Droplets,
 
           <div class="card overflow-hidden">
             <div class="p-5 border-b border-slate-200 dark:border-slate-700">
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                <lucide-angular [img]="ClockIcon" class="w-4.5 h-4.5 text-stellar-blue"></lucide-angular>
+              <h2
+                class="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2"
+              >
+                <lucide-angular
+                  [img]="ClockIcon"
+                  class="w-4.5 h-4.5 text-stellar-blue"
+                ></lucide-angular>
                 Recent Transactions
               </h2>
             </div>
             <div *ngIf="(transactions$ | async)?.length === 0" class="p-5">
-              <app-empty-state title="No transactions yet" message="Your recent credit transactions will appear here."></app-empty-state>
+              <app-empty-state
+                title="No transactions yet"
+                message="Your recent credit transactions will appear here."
+              ></app-empty-state>
             </div>
-            <div *ngIf="(transactions$ | async)?.length > 0" class="divide-y divide-slate-100 dark:divide-slate-700/50">
-              <div *ngFor="let tx of transactions$ | async" class="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+            <div
+              *ngIf="((transactions$ | async) ?? []).length > 0"
+              class="divide-y divide-slate-100 dark:divide-slate-700/50"
+            >
+              <div
+                *ngFor="let tx of transactions$ | async"
+                class="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+              >
                 <div class="flex items-center gap-3">
-                  <div [class]="tx.type === 'mint' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : tx.type === 'retire' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'" class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <lucide-angular [img]="tx.type === 'mint' ? ArrowUpRightIcon : tx.type === 'retire' ? ArrowDownRightIcon : ArrowLeftRightIcon" class="w-4 h-4"></lucide-angular>
+                  <div
+                    [class]="
+                      tx.type === 'mint'
+                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                        : tx.type === 'retire'
+                          ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    "
+                    class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  >
+                    <lucide-angular
+                      [img]="
+                        tx.type === 'mint'
+                          ? ArrowUpRightIcon
+                          : tx.type === 'retire'
+                            ? ArrowDownRightIcon
+                            : ArrowLeftRightIcon
+                      "
+                      class="w-4 h-4"
+                    ></lucide-angular>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-slate-900 dark:text-white capitalize">{{ tx.type }}</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ tx.txHash | stellarAddress }}</p>
+                    <p class="text-sm font-medium text-slate-900 dark:text-white capitalize">
+                      {{ tx.type }}
+                    </p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                      {{ tx.txHash | stellarAddress }}
+                    </p>
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-sm font-semibold font-mono" [class.text-emerald-600]="tx.type === 'mint'" [class.text-red-600]="tx.type === 'retire'" [class.text-blue-600]="tx.type === 'transfer' || tx.type === 'sale'">
+                  <p
+                    class="text-sm font-semibold font-mono"
+                    [class.text-emerald-600]="tx.type === 'mint'"
+                    [class.text-red-600]="tx.type === 'retire'"
+                    [class.text-blue-600]="tx.type === 'transfer' || tx.type === 'sale'"
+                  >
                     {{ tx.type === 'mint' ? '+' : '-' }}{{ tx.amount | creditAmount }}
                   </p>
-                  <p class="text-xs text-slate-400">{{ tx.timestamp | dateFormat:'relative' }}</p>
+                  <p class="text-xs text-slate-400">{{ tx.timestamp | dateFormat: 'relative' }}</p>
                 </div>
               </div>
             </div>
@@ -155,7 +290,7 @@ import { LucideAngularModule, Wallet, DollarSign, PieChart, RefreshCw, Droplets,
       (close)="closeRetireModal()"
       (confirm)="onRetireConfirm($event)"
     />
-  `
+  `,
 })
 export class CreditsPortfolioComponent implements OnInit, OnDestroy {
   protected portfolio$: Observable<CreditPortfolio | null>;
@@ -193,9 +328,9 @@ export class CreditsPortfolioComponent implements OnInit, OnDestroy {
     private creditsService: CreditsService,
     private notificationService: NotificationService,
   ) {
-    this.portfolio$ = this.store.select(state => state.credits.portfolio);
-    this.loading$ = this.store.select(state => state.credits.loading);
-    this.transactions$ = this.store.select(state => state.credits.transactions);
+    this.portfolio$ = this.store.select((state) => state.credits.portfolio);
+    this.loading$ = this.store.select((state) => state.credits.loading);
+    this.transactions$ = this.store.select((state) => state.credits.transactions);
   }
 
   ngOnInit(): void {
@@ -212,11 +347,13 @@ export class CreditsPortfolioComponent implements OnInit, OnDestroy {
   }
 
   protected openRetireModal(balance: CreditBalance): void {
-    this.retireProjects = [{
-      id: balance.projectId,
-      name: balance.projectName,
-      balance: balance.balance,
-    }];
+    this.retireProjects = [
+      {
+        id: balance.projectId,
+        name: balance.projectName,
+        balance: balance.balance,
+      },
+    ];
     this.showRetireModal = true;
   }
 

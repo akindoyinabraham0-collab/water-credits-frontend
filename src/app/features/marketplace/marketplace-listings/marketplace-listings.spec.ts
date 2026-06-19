@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MarketplaceListings } from './marketplace-listings';
+import { MarketplaceListingsComponent } from './marketplace-listings';
 
-describe('MarketplaceListings', () => {
-  let component: MarketplaceListings;
-  let fixture: ComponentFixture<MarketplaceListings>;
+describe('MarketplaceListingsComponent', () => {
+  let component: MarketplaceListingsComponent;
+  let fixture: ComponentFixture<MarketplaceListingsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MarketplaceListings]
-    })
-    .compileComponents();
+      imports: [MarketplaceListingsComponent],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(MarketplaceListings);
+    fixture = TestBed.createComponent(MarketplaceListingsComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

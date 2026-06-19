@@ -16,33 +16,45 @@ import { LucideAngularModule, Wallet, ChevronDown, LogOut, Copy, Check } from 'l
         </button>
       </ng-container>
       <ng-container *ngIf="connected">
-        <button (click)="showMenu = !showMenu" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <button
+          (click)="showMenu = !showMenu"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
           <span class="w-2 h-2 rounded-full bg-green-500"></span>
           <span class="text-sm font-mono">{{ address | stellarAddress }}</span>
           <lucide-angular [img]="ChevronDownIcon" class="w-3 h-3 text-slate-400"></lucide-angular>
         </button>
-        <div *ngIf="showMenu" class="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-bg-lighter rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-2 z-50">
+        <div
+          *ngIf="showMenu"
+          class="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-bg-lighter rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 py-2 z-50"
+        >
           <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700">
             <p class="text-xs text-slate-500 dark:text-slate-400">Connected as</p>
             <p class="text-sm font-mono truncate">{{ address }}</p>
           </div>
-          <button (click)="copyAddress()" class="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
+          <button
+            (click)="copyAddress()"
+            class="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+          >
             <lucide-angular [img]="copied ? CheckIcon : CopyIcon" class="w-4 h-4"></lucide-angular>
             {{ copied ? 'Copied!' : 'Copy Address' }}
           </button>
-          <button (click)="disconnect.emit(); showMenu = false" class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+          <button
+            (click)="disconnect.emit(); showMenu = false"
+            class="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+          >
             <lucide-angular [img]="LogOutIcon" class="w-4 h-4"></lucide-angular>
             Disconnect
           </button>
         </div>
       </ng-container>
     </div>
-  `
+  `,
 })
 export class WalletConnectComponent {
-  @Input() connected: boolean = false;
-  @Input() address: string = '';
-  @Input() network: string = 'testnet';
+  @Input() connected = false;
+  @Input() address = '';
+  @Input() network = 'testnet';
   @Output() connect = new EventEmitter<void>();
   @Output() disconnect = new EventEmitter<void>();
 
@@ -62,6 +74,6 @@ export class WalletConnectComponent {
   copyAddress(): void {
     navigator.clipboard.writeText(this.address);
     this.copied = true;
-    setTimeout(() => this.copied = false, 2000);
+    setTimeout(() => (this.copied = false), 2000);
   }
 }

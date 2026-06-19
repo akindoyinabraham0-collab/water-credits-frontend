@@ -14,14 +14,19 @@ import { LucideAngularModule, Droplets, TrendingUp, MapPin } from 'lucide-angula
       <div class="p-5">
         <div class="flex items-start justify-between mb-3">
           <div>
-            <h3 class="font-semibold text-slate-900 dark:text-white mb-1">{{ project?.name || 'Project' }}</h3>
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-1">
+              {{ project?.name || 'Project' }}
+            </h3>
             <app-status-badge [status]="project?.status || ''"></app-status-badge>
           </div>
           <div class="w-10 h-10 rounded-lg bg-stellar-blue/10 flex items-center justify-center">
             <lucide-angular [img]="DropletsIcon" class="w-5 h-5 text-stellar-blue"></lucide-angular>
           </div>
         </div>
-        <div *ngIf="showLocation" class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mb-3">
+        <div
+          *ngIf="showLocation"
+          class="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mb-3"
+        >
           <lucide-angular [img]="MapPinIcon" class="w-3 h-3"></lucide-angular>
           <span>{{ project?.latitude?.toFixed(4) }}, {{ project?.longitude?.toFixed(4) }}</span>
         </div>
@@ -35,7 +40,9 @@ import { LucideAngularModule, Droplets, TrendingUp, MapPin } from 'lucide-angula
             <p class="text-lg font-bold text-credit-gold">{{ price ? '$' + price : 'N/A' }}</p>
           </div>
         </div>
-        <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+        <div
+          class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700"
+        >
           <div class="flex items-center gap-1 text-xs text-slate-500">
             <lucide-angular [img]="TrendingUpIcon" class="w-3 h-3"></lucide-angular>
             <span>{{ retired | creditAmount }} retired</span>
@@ -44,15 +51,21 @@ import { LucideAngularModule, Droplets, TrendingUp, MapPin } from 'lucide-angula
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class CreditCardComponent {
-  @Input() project?: { name?: string; status?: ProjectStatus | string; latitude?: number; longitude?: number; areaHectares?: number };
+  @Input() project?: {
+    name?: string;
+    status?: ProjectStatus | string;
+    latitude?: number;
+    longitude?: number;
+    areaHectares?: number;
+  };
   @Input() balance: string | number = '0';
-  @Input() price: number = 0;
+  @Input() price = 0;
   @Input() retired: string | number = '0';
-  @Input() area: number = 0;
-  @Input() showLocation: boolean = true;
+  @Input() area = 0;
+  @Input() showLocation = true;
 
   protected readonly DropletsIcon = Droplets;
   protected readonly TrendingUpIcon = TrendingUp;

@@ -1,44 +1,78 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NgClass, NgIf, NgFor } from '@angular/common';
-import { LucideAngularModule, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-pagination-controls',
   standalone: true,
   imports: [NgClass, NgIf, NgFor, LucideAngularModule],
   template: `
-    <div class="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+    <div
+      class="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700"
+    >
       <div class="text-sm text-slate-600 dark:text-slate-400">
-        Showing <span class="font-medium">{{ startItem }}</span> to <span class="font-medium">{{ endItem }}</span> of <span class="font-medium">{{ total }}</span>
+        Showing <span class="font-medium">{{ startItem }}</span> to
+        <span class="font-medium">{{ endItem }}</span> of
+        <span class="font-medium">{{ total }}</span>
       </div>
       <div class="flex items-center gap-1">
-        <button (click)="goToPage.emit(1)" [disabled]="page === 1" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed">
+        <button
+          (click)="goToPage.emit(1)"
+          [disabled]="page === 1"
+          class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <lucide-angular [img]="ChevronsLeftIcon" class="w-4 h-4"></lucide-angular>
         </button>
-        <button (click)="goToPage.emit(page - 1)" [disabled]="page === 1" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed">
+        <button
+          (click)="goToPage.emit(page - 1)"
+          [disabled]="page === 1"
+          class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <lucide-angular [img]="ChevronLeftIcon" class="w-4 h-4"></lucide-angular>
         </button>
         <ng-container *ngFor="let p of pages">
-          <button *ngIf="p !== -1" (click)="goToPage.emit(p)" [ngClass]="{'bg-stellar-blue text-white': p === page, 'hover:bg-slate-100 dark:hover:bg-slate-700': p !== page}" class="px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+          <button
+            *ngIf="p !== -1"
+            (click)="goToPage.emit(p)"
+            [ngClass]="{
+              'bg-stellar-blue text-white': p === page,
+              'hover:bg-slate-100 dark:hover:bg-slate-700': p !== page,
+            }"
+            class="px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+          >
             {{ p }}
           </button>
           <span *ngIf="p === -1" class="px-2 text-slate-400">...</span>
         </ng-container>
-        <button (click)="goToPage.emit(page + 1)" [disabled]="page === totalPages" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed">
+        <button
+          (click)="goToPage.emit(page + 1)"
+          [disabled]="page === totalPages"
+          class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <lucide-angular [img]="ChevronRightIcon" class="w-4 h-4"></lucide-angular>
         </button>
-        <button (click)="goToPage.emit(totalPages)" [disabled]="page === totalPages" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed">
+        <button
+          (click)="goToPage.emit(totalPages)"
+          [disabled]="page === totalPages"
+          class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <lucide-angular [img]="ChevronsRightIcon" class="w-4 h-4"></lucide-angular>
         </button>
       </div>
     </div>
-  `
+  `,
 })
 export class PaginationControlsComponent {
-  @Input() page: number = 1;
-  @Input() totalPages: number = 1;
-  @Input() total: number = 0;
-  @Input() limit: number = 10;
+  @Input() page = 1;
+  @Input() totalPages = 1;
+  @Input() total = 0;
+  @Input() limit = 10;
   @Output() goToPage = new EventEmitter<number>();
 
   protected readonly ChevronLeftIcon = ChevronLeft;
@@ -46,8 +80,12 @@ export class PaginationControlsComponent {
   protected readonly ChevronsLeftIcon = ChevronsLeft;
   protected readonly ChevronsRightIcon = ChevronsRight;
 
-  get startItem(): number { return this.total === 0 ? 0 : (this.page - 1) * this.limit + 1; }
-  get endItem(): number { return Math.min(this.page * this.limit, this.total); }
+  get startItem(): number {
+    return this.total === 0 ? 0 : (this.page - 1) * this.limit + 1;
+  }
+  get endItem(): number {
+    return Math.min(this.page * this.limit, this.total);
+  }
 
   get pages(): number[] {
     const total = this.totalPages;

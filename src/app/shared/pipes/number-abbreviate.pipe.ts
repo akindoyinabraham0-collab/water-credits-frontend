@@ -2,7 +2,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({ name: 'numberAbbreviate', standalone: true })
 export class NumberAbbreviatePipe implements PipeTransform {
-  transform(value: number | string, decimals: number = 2): string {
+  transform(value: number | string, decimals = 2): string {
     const num = typeof value === 'string' ? parseFloat(value) : value;
     if (isNaN(num)) return '0';
     if (num === 0) return '0';

@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CreditsPortfolio } from './credits-portfolio';
+import { CreditsPortfolioComponent } from './credits-portfolio';
 
-describe('CreditsPortfolio', () => {
-  let component: CreditsPortfolio;
-  let fixture: ComponentFixture<CreditsPortfolio>;
+describe('CreditsPortfolioComponent', () => {
+  let component: CreditsPortfolioComponent;
+  let fixture: ComponentFixture<CreditsPortfolioComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreditsPortfolio]
-    })
-    .compileComponents();
+      imports: [CreditsPortfolioComponent],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(CreditsPortfolio);
+    fixture = TestBed.createComponent(CreditsPortfolioComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

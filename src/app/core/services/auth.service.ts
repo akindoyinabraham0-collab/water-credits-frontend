@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { WalletService } from './wallet.service';
-import { BehaviorSubject, Observable, from } from 'rxjs';
-import { tap, map, switchMap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private userSubject = new BehaviorSubject<any | null>(null);
@@ -13,7 +12,7 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private walletService: WalletService
+    private walletService: WalletService,
   ) {
     const savedToken = localStorage.getItem('token');
     if (savedToken) {
@@ -25,10 +24,15 @@ export class AuthService {
     try {
       const wallet = await this.walletService.connect();
       if (!wallet) return false;
-      const { challenge } = await this.apiService.post<{ challenge: string }>('/auth/challenge', { wallet });
+      const { challenge } = await this.apiService.post<{ challenge: string }>('/auth/challenge', {
+        wallet,
+      });
       const signature = await this.walletService.signChallenge(challenge);
       if (!signature) return false;
-      const { token, user } = await this.apiService.post<{ token: string; user: any }>('/auth/login', { wallet, signature, challenge });
+      const { token, user } = await this.apiService.post<{ token: string; user: any }>(
+        '/auth/login',
+        { wallet, signature, challenge },
+      );
       localStorage.setItem('token', token);
       this.userSubject.next(user);
       return true;
@@ -42,12 +46,28 @@ export class AuthService {
     return this.apiService.post<{ challenge: string }>('/auth/challenge', { wallet });
   }
 
-  async loginWithCreds(wallet: string, signature: string, challenge: string): Promise<{ token: string; user: any }> {
-    return this.apiService.post<{ token: string; user: any }>('/auth/login', { wallet, signature, challenge });
+  async loginWithCreds(
+    wallet: string,
+    signature: string,
+    challenge: string,
+  ): Promise<{ token: string; user: any }> {
+    return this.apiService.post<{ token: string; user: any }>('/auth/login', {
+      wallet,
+      signature,
+      challenge,
+    });
   }
 
-  async register(wallet: string, email?: string, displayName?: string): Promise<{ token: string; user: any }> {
-    return this.apiService.post<{ token: string; user: any }>('/auth/register', { wallet, email, displayName });
+  async register(
+    wallet: string,
+    email?: string,
+    displayName?: string,
+  ): Promise<{ token: string; user: any }> {
+    return this.apiService.post<{ token: string; user: any }>('/auth/register', {
+      wallet,
+      email,
+      displayName,
+    });
   }
 
   logout(): void {
@@ -60,7 +80,7 @@ export class AuthService {
     try {
       const user = await this.apiService.get<any>('/users/me');
       this.userSubject.next(user);
-    } catch (error) {
+    } catch {
       this.logout();
     }
   }

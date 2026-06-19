@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { SensorDevice, SensorReading, ReadingBatch, ReadingSummary } from '../models/sensor-reading.model';
-import { PaginatedResponse } from '../models/pagination.model';
+import {
+  SensorDevice,
+  SensorReading,
+  ReadingBatch,
+  ReadingSummary,
+} from '../models/sensor-reading.model';
 
 @Injectable({ providedIn: 'root' })
 export class SensorsService {
@@ -21,7 +25,10 @@ export class SensorsService {
     return this.api.post<SensorDevice>('/sensors/devices', data);
   }
 
-  async getReadings(deviceId: string, params?: { from?: string; to?: string; limit?: number }): Promise<SensorReading[]> {
+  async getReadings(
+    deviceId: string,
+    params?: { from?: string; to?: string; limit?: number },
+  ): Promise<SensorReading[]> {
     return this.api.get<SensorReading[]>(`/sensors/devices/${deviceId}/readings`, { params });
   }
 
