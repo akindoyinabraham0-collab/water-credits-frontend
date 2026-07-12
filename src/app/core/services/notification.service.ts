@@ -19,7 +19,7 @@ export class NotificationService {
   constructor() {}
 
   show(notification: Omit<ToastNotification, 'id'>) {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = Math.random().toString(36).substring(2, 11);
     const newNotification = { ...notification, id };
     
     const current = this.notificationsSubject.value;
