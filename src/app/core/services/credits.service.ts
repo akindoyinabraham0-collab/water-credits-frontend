@@ -15,7 +15,7 @@ export class CreditsService {
   }
 
   async getTransactions(projectId?: string): Promise<CreditTransaction[]> {
-    const params: Record<string, any> = {};
+    const params: Record<string, string | number | boolean> = {};
     if (projectId) params['projectId'] = projectId;
     return this.api.get<CreditTransaction[]>('/credits/transactions', { params });
   }

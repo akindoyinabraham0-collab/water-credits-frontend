@@ -15,7 +15,7 @@ export class GovernanceService {
     return this.api.get<Proposal>(`/governance/proposals/${id}`);
   }
 
-  async createProposal(data: { title: string; description: string; actionType: string; actionParams: Record<string, any> }): Promise<Proposal> {
+  async createProposal(data: { title: string; description: string; actionType: string; actionParams: Record<string, string | number | boolean> }): Promise<Proposal> {
     return this.api.post<Proposal>('/governance/proposals', data);
   }
 

@@ -13,7 +13,7 @@ export class SensorsService {
   constructor(private api: ApiService) {}
 
   async getDevices(projectId?: string): Promise<SensorDevice[]> {
-    const params: Record<string, any> = {};
+    const params: Record<string, string | number | boolean> = {};
     if (projectId) params['projectId'] = projectId;
     return this.api.get<SensorDevice[]>('/sensors/devices', { params });
   }

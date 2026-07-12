@@ -8,7 +8,7 @@ export class ProjectsService {
   constructor(private api: ApiService) {}
 
   async getProjects(filters?: ProjectFilters): Promise<PaginatedResponse<Project>> {
-    const params: Record<string, any> = {};
+    const params: Record<string, string | number | boolean> = {};
     if (filters) {
       if (filters.page) params['page'] = filters.page;
       if (filters.limit) params['limit'] = filters.limit;
