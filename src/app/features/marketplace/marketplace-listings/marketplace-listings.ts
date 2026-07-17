@@ -5,7 +5,10 @@ import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, Plus, BarChart3 } from 'lucide-angular';
 import { MarketplaceService, MarketplaceListing } from '../../../core/services/marketplace.service';
 import { ProjectsService } from '../../../core/services/projects.service';
-import { DataTableComponent, ColumnDef } from '../../../shared/components/data-table/data-table';
+import {
+  DataTableComponent,
+  ColumnDef,
+} from '../../../shared/components/data-table/data-table.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 import { SearchInputComponent } from '../../../shared/components/search-input/search-input';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner';
@@ -19,18 +22,32 @@ import { NumberAbbreviatePipe } from '../../../shared/pipes/number-abbreviate.pi
   selector: 'app-marketplace-listings',
   standalone: true,
   imports: [
-    NgIf, NgFor, NgClass, NgSwitch, NgSwitchCase,
-    FormsModule, RouterLink, LucideAngularModule,
-    DataTableComponent, StatusBadgeComponent, SearchInputComponent,
-    LoadingSpinnerComponent, EmptyStateComponent,
-    CreditAmountPipe, DateFormatPipe, StellarAddressPipe, NumberAbbreviatePipe,
+    NgIf,
+    NgFor,
+    NgClass,
+    NgSwitch,
+    NgSwitchCase,
+    FormsModule,
+    RouterLink,
+    LucideAngularModule,
+    DataTableComponent,
+    StatusBadgeComponent,
+    SearchInputComponent,
+    LoadingSpinnerComponent,
+    EmptyStateComponent,
+    CreditAmountPipe,
+    DateFormatPipe,
+    StellarAddressPipe,
+    NumberAbbreviatePipe,
   ],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Marketplace</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Browse and trade water credits</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Browse and trade water credits
+          </p>
         </div>
         <div class="flex items-center gap-3">
           <a routerLink="/marketplace/orderbook" class="btn btn-ghost">
@@ -72,7 +89,11 @@ import { NumberAbbreviatePipe } from '../../../shared/pipes/number-abbreviate.pi
         </select>
       </div>
 
-      <app-loading-spinner *ngIf="loading" size="lg" label="Loading listings..."></app-loading-spinner>
+      <app-loading-spinner
+        *ngIf="loading"
+        size="lg"
+        label="Loading listings..."
+      ></app-loading-spinner>
 
       <app-empty-state
         *ngIf="!loading && listings.length === 0"
@@ -87,12 +108,11 @@ import { NumberAbbreviatePipe } from '../../../shared/pipes/number-abbreviate.pi
         [columns]="columns"
         [data]="listings"
         [loading]="false"
-        [page]="page"
-        [totalPages]="totalPages"
-        [total]="total"
-        [limit]="limit"
-        [showPagination]="true"
-        (pageChange)="onPageChange($event)"
+        [pagination]="pagination"
+        [totalPages]="pagination?.totalPages ?? 1"
+        [total]="pagination?.total ?? 0"
+        [limit]="pagination?.limit ?? 10"
+        (page)="onPageChange($event)"
       >
         <ng-template #row let-row let-col="column">
           <ng-container [ngSwitch]="col.key">
@@ -100,22 +120,32 @@ import { NumberAbbreviatePipe } from '../../../shared/pipes/number-abbreviate.pi
               <span class="font-medium text-slate-900 dark:text-white">{{ row.projectName }}</span>
             </ng-template>
             <ng-template ngSwitchCase="sellerName">
-              <span class="text-slate-600 dark:text-slate-400">{{ row.sellerName || (row.sellerId | stellarAddress) }}</span>
+              <span class="text-slate-600 dark:text-slate-400">{{
+                row.sellerName || (row.sellerId | stellarAddress)
+              }}</span>
             </ng-template>
             <ng-template ngSwitchCase="amount">
-              <span class="font-mono text-slate-700 dark:text-slate-300">{{ row.amount | creditAmount }}</span>
+              <span class="font-mono text-slate-700 dark:text-slate-300">{{
+                row.amount | creditAmount
+              }}</span>
             </ng-template>
             <ng-template ngSwitchCase="price">
-              <span class="font-mono text-slate-700 dark:text-slate-300">{{ row.price | numberAbbreviate }} XLM</span>
+              <span class="font-mono text-slate-700 dark:text-slate-300"
+                >{{ row.price | numberAbbreviate }} XLM</span
+              >
             </ng-template>
             <ng-template ngSwitchCase="totalValue">
-              <span class="font-mono text-slate-700 dark:text-slate-300">{{ row.totalValue | numberAbbreviate }} XLM</span>
+              <span class="font-mono text-slate-700 dark:text-slate-300"
+                >{{ row.totalValue | numberAbbreviate }} XLM</span
+              >
             </ng-template>
             <ng-template ngSwitchCase="status">
               <app-status-badge [status]="row.status"></app-status-badge>
             </ng-template>
             <ng-template ngSwitchCase="createdAt">
-              <span class="text-slate-500 dark:text-slate-400">{{ row.createdAt | dateFormat: 'short' }}</span>
+              <span class="text-slate-500 dark:text-slate-400">{{
+                row.createdAt | dateFormat: 'short'
+              }}</span>
             </ng-template>
             <ng-template ngSwitchCase="actions">
               <button
@@ -168,10 +198,7 @@ export class MarketplaceListingsComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([
-      this.loadListings(),
-      this.loadProjects(),
-    ]);
+    await Promise.all([this.loadListings(), this.loadProjects()]);
   }
 
   async loadListings(): Promise<void> {
@@ -196,7 +223,7 @@ export class MarketplaceListingsComponent implements OnInit {
   async loadProjects(): Promise<void> {
     try {
       const response = await this.projectsService.getProjects({ limit: 100 });
-      this.projects = response.data.map(p => ({ id: p.id, name: p.name }));
+      this.projects = response.data.map((p) => ({ id: p.id, name: p.name }));
     } catch {
       this.projects = [];
     }

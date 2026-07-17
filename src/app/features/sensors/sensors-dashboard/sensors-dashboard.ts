@@ -7,7 +7,10 @@ import { SensorDevice, SensorReading } from '../../../core/models/sensor-reading
 import { SensorsService } from '../../../core/services/sensors.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { DataTableComponent, ColumnDef } from '../../../shared/components/data-table/data-table';
+import {
+  DataTableComponent,
+  ColumnDef,
+} from '../../../shared/components/data-table/data-table.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner';
@@ -262,7 +265,6 @@ const STATUS_THRESHOLDS: Record<string, { good: [number, number]; warning: [numb
             [columns]="deviceColumns"
             [data]="devices"
             [loading]="false"
-            [showPagination]="false"
             emptyTitle="No devices registered"
             emptyMessage="Register a sensor device to start monitoring water quality."
           />
