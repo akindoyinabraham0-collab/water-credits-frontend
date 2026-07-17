@@ -48,9 +48,6 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
         [data]="retirements"
         [loading]="loading"
         [pagination]="pagination"
-        [totalPages]="pagination?.totalPages ?? 1"
-        [total]="pagination?.total ?? 0"
-        [limit]="pagination?.limit ?? 10"
         emptyTitle="No retirements yet"
         emptyMessage="You haven't retired any credits yet. Start your first retirement to offset your carbon footprint."
         (page)="onPageChange($event)"
@@ -97,10 +94,14 @@ export class RetirementHistoryComponent implements OnInit {
   protected total = 0;
   protected limit = 10;
 
+  protected get pagination() {
+    return { page: this.page, totalPages: this.totalPages, total: this.total, limit: this.limit };
+  }
+
   protected readonly PlusIcon = Plus;
   protected readonly FileTextIcon = FileText;
 
-  protected columns: ColumnDef[] = [
+  protected columns: ColumnDef<Retirement>[] = [
     { key: 'projectName', label: 'Project', width: '25%' },
     { key: 'amount', label: 'Amount' },
     { key: 'purpose', label: 'Purpose' },
