@@ -1,48 +1,77 @@
 import { Injectable } from '@angular/core';
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { environment } from '../../../environments/environment';
-import { STORAGE_KEYS } from '../constants/app.constants';
+import { SessionBusService } from './session-bus.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+/**
+ * HTTP client wrapper around axios.
+ *
+ * Token ownership:
+ *   The JWT is owned exclusively by NgRx AuthState.  This service receives
+ *   it via a registered callback (setTokenProvider) that AuthEffects calls
+ *   once on startup, pointing at a Store selector read.  This avoids
+ *   injecting Store here (which would create a circular DI chain via
+ *   Effects → ApiService → Store).
+ *
+ * 401 handling:
+ *   On a 401 response, SessionBusService.notifyUnauthorized() is called.
+ *   AuthEffects listens on that bus and dispatches forceLogout, which
+ *   clears localStorage, redirects, and disconnects the WebSocket as a
+ *   single unified code path.
+ */
+@Injectable({ providedIn: 'root' })
 export class ApiService {
   private axiosInstance: AxiosInstance;
 
-  constructor() {
+  /**
+   * Registered by AuthEffects on startup. Returns the current JWT from the
+   * NgRx store synchronously (via Store.selectSignal or a cached value).
+   */
+  private tokenProvider: (() => string | null) | null = null;
+
+  constructor(private sessionBus: SessionBusService) {
     this.axiosInstance = axios.create({
       baseURL: environment.apiUrl,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' },
     });
 
-    // Request interceptor for JWT
+    // ── Request interceptor: attach JWT ───────────────────────────────────
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+        const token = this.tokenProvider?.() ?? null;
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
-    // Response interceptor for error mapping
+    // ── Response interceptor: map errors, handle 401 ──────────────────────
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      (error) => {
+      (error: AxiosError) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          // Do NOT touch localStorage here — the effects own that.
+          this.sessionBus.notifyUnauthorized();
         }
-        return Promise.reject(this.handleError(error));
-      }
+        return Promise.reject(this.mapError(error));
+      },
     );
   }
 
-  private handleError(error: AxiosError): { message: string; [key: string]: unknown } {
-    const message = (error.response?.data as { message?: string })?.message || 'An unexpected error occurred';
+  /**
+   * Register the token provider.  Called once by AuthEffects on init so that
+   * the request interceptor can read the current token from the store without
+   * a circular DI dependency.
+   */
+  setTokenProvider(provider: () => string | null): void {
+    this.tokenProvider = provider;
+  }
+
+  private mapError(error: AxiosError): { message: string; [key: string]: unknown } {
+    const message =
+      (error.response?.data as { message?: string })?.message ?? 'An unexpected error occurred';
     return { ...error, message };
   }
 
