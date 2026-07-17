@@ -4,7 +4,10 @@ import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Plus, FileText } from 'lucide-angular';
 import { RetirementService } from '../../../core/services/retirement.service';
 import { Retirement } from '../../../core/models/retirement.model';
-import { DataTableComponent, ColumnDef } from '../../../shared/components/data-table/data-table';
+import {
+  DataTableComponent,
+  ColumnDef,
+} from '../../../shared/components/data-table/data-table.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 import { CreditAmountPipe } from '../../../shared/pipes/credit-amount.pipe';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
@@ -44,13 +47,13 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
         [columns]="columns"
         [data]="retirements"
         [loading]="loading"
-        [page]="page"
-        [totalPages]="totalPages"
-        [total]="total"
-        [limit]="limit"
+        [pagination]="pagination"
+        [totalPages]="pagination?.totalPages ?? 1"
+        [total]="pagination?.total ?? 0"
+        [limit]="pagination?.limit ?? 10"
         emptyTitle="No retirements yet"
         emptyMessage="You haven't retired any credits yet. Start your first retirement to offset your carbon footprint."
-        (pageChange)="onPageChange($event)"
+        (page)="onPageChange($event)"
       >
         <ng-template #row let-row let-col="column">
           <ng-container [ngSwitch]="col.key">
