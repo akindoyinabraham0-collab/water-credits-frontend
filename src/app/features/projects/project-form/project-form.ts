@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ApiService } from '../../../core/services/api.service';
@@ -326,8 +327,7 @@ const ALLOWED_MIME = [
     </div><!-- /max-w -->
   `,
 })
-export class ProjectFormComponent implements OnInit, OnDestroy, PendingChanges {
-  // ── step state ──────────────────────────────────────────────────────────
+export class ProjectFormComponent implements OnInit, OnDestroy {
   protected currentStep = 0;
   protected maxVisitedStep = 0;
   protected saving = false;
@@ -398,20 +398,59 @@ export class ProjectFormComponent implements OnInit, OnDestroy, PendingChanges {
   // ── lifecycle ───────────────────────────────────────────────────────────
   private destroy$ = new Subject<void>();
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private store: Store,
-    private apiService: ApiService,
+    private actions$: Actions,
+    private projectsService: ProjectsService,
     private notificationService: NotificationService,
   ) {}
 
-  ngOnInit(): void {
-    this.store
-      .select(selectProjectsError)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({ next: (err) => { this.storeError = err; } });
+  async ngOnInit(): Promise<void> {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEdit = true;
+      try {
+        const project = await this.projectsService.getProject(id);
+        this.form = {
+          name: project.name,
+          description: project.description,
+          latitude: project.latitude,
+          longitude: project.longitude,
+          methodology: project.methodology,
+          areaHectares: project.areaHectares,
+          baselineStart: project.baselineStart?.split('T')[0] || '',
+          baselineEnd: project.baselineEnd?.split('T')[0] || '',
+        };
+      } catch {
+        this.notificationService.error('Error', 'Failed to load project for editing');
+        this.router.navigate(['/projects']);
+      }
+    }
+
+    // Navigate to the new project page after a successful create dispatched via the store.
+    this.actions$
+      .pipe(ofType(ProjectsActions.createProjectSuccess), takeUntil(this.destroy$))
+      .subscribe(({ project }) => {
+        this.notificationService.success(
+          'Project created',
+          `${project.name} has been registered successfully`,
+        );
+        this.saving = false;
+        this.router.navigate(['/projects', project.id]);
+      });
+
+    // Surface field-level API errors back to the form.
+    this.actions$
+      .pipe(ofType(ProjectsActions.createProjectFailure), takeUntil(this.destroy$))
+      .subscribe(({ error }) => {
+        this.notificationService.error('Failed to create project', error);
+        this.saving = false;
+      });
   }
 
   ngOnDestroy(): void {
@@ -465,157 +504,10 @@ export class ProjectFormComponent implements OnInit, OnDestroy, PendingChanges {
     this.router.navigate(['/projects']);
   }
 
-  // ── map callback ────────────────────────────────────────────────────────
-  onLocationPicked(loc: MapLocation): void {
-    this.step1.patchValue({ latitude: loc.center.lat, longitude: loc.center.lng });
-    this.step1.markAsDirty();
-    this.drawnBoundary = loc.boundary;
-    this.locationComplete = !!loc.boundary; // both pin+polygon required
-    this.boundaryVertices = loc.boundary?.coordinates[0]?.length
-      ? loc.boundary.coordinates[0].length - 1   // -1 because first === last
-      : 0;
-
-    // Auto-calculate area from polygon (rough spherical-excess approximation)
-    if (loc.boundary) {
-      const ha = this.calcPolygonAreaHa(loc.boundary);
-      if (ha > 0) {
-        this.step2.patchValue({ areaHectares: parseFloat(ha.toFixed(2)) });
-      }
-    }
-  }
-
-  /** Approximate polygon area in hectares using the shoelace formula on lat/lng.
-   *  Good enough for reasonable project sizes; exact area would need a proper
-   *  geodesic library. */
-  private calcPolygonAreaHa(poly: GeoJSON.Polygon): number {
-    const ring = poly.coordinates[0];
-    if (!ring || ring.length < 4) return 0;
-    let area = 0;
-    const R = 6371000; // Earth radius in metres
-    for (let i = 0; i < ring.length - 1; i++) {
-      const [lng1, lat1] = ring[i];
-      const [lng2, lat2] = ring[i + 1];
-      area +=
-        ((lng2 - lng1) * (Math.PI / 180)) *
-        (2 + Math.sin((lat1 * Math.PI) / 180) + Math.sin((lat2 * Math.PI) / 180));
-    }
-    area = Math.abs((area * R * R) / 2);
-    return area / 10000; // m² → ha
-  }
-
-  // ── document upload ─────────────────────────────────────────────────────
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOver = true;
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.dragOver = false;
-    const files = Array.from(event.dataTransfer?.files ?? []);
-    this.handleFiles(files);
-  }
-
-  onFileInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []);
-    this.handleFiles(files);
-    input.value = '';
-  }
-
-  private handleFiles(files: File[]): void {
-    for (const file of files) {
-      if (this.docs.length >= MAX_FILES) {
-        this.notificationService.warning(
-          'File limit reached',
-          `Maximum ${MAX_FILES} files allowed.`,
-        );
-        break;
-      }
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        this.notificationService.error(
-          'File too large',
-          `${file.name} exceeds 10 MB.`,
-        );
-        continue;
-      }
-      if (!ALLOWED_MIME.includes(file.type)) {
-        this.notificationService.error(
-          'Unsupported file type',
-          `${file.name} must be PDF or DOCX.`,
-        );
-        continue;
-      }
-      this.uploadFile(file);
-    }
-  }
-
-  private uploadFile(file: File): void {
-    const entry: UploadedDoc = {
-      fileId: '',
-      filename: file.name,
-      size: file.size,
-      uploading: true,
-    };
-    this.docs.push(entry);
-    const idx = this.docs.length - 1;
-
-    this.apiService
-      .uploadFile(file)
-      .then((res) => {
-        this.docs[idx].fileId = res.fileId;
-        this.docs[idx].uploading = false;
-      })
-      .catch(() => {
-        this.docs[idx].uploading = false;
-        this.docs[idx].error = 'Upload failed';
-      });
-  }
-
-  removeDoc(index: number): void {
-    this.docs.splice(index, 1);
-  }
-
-  // ── submission ──────────────────────────────────────────────────────────
-  submit(): void {
+  save(): void {
     if (this.saving) return;
     this.saving = true;
-    this.storeError = null;
-
-    const payload = {
-      name:        this.step0.get('name')!.value as string,
-      description: this.step0.get('description')!.value as string,
-      methodology: this.step0.get('methodology')!.value as string,
-      latitude:    this.step1.get('latitude')!.value as number,
-      longitude:   this.step1.get('longitude')!.value as number,
-      areaHectares:  this.step2.get('areaHectares')!.value as number,
-      baselineStart: this.step2.get('baselineStart')!.value as string,
-      baselineEnd:   this.step2.get('projectStartDate')!.value as string,
-      // fileIds passed as extra field; backend may ignore if unsupported
-      ...(this.docs.filter((d) => d.fileId).length > 0
-        ? { documentFileIds: this.docs.filter((d) => d.fileId).map((d) => d.fileId) }
-        : {}),
-    };
-
-    // Subscribe once to createProjectSuccess to mark submitted and stop saving
-    this.store
-      .select(selectProjectsLoading)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({ next: (loading) => { if (!loading) this.saving = false; } });
-
-    this.submitted = true;
-    this.store.dispatch(ProjectsActions.createProject({ data: payload }));
-  }
-
-  // ── validators ──────────────────────────────────────────────────────────
-  private dateOrderValidator(group: FormGroup) {
-    const start = group.get('baselineStart')?.value as string;
-    const end   = group.get('projectStartDate')?.value as string;
-    if (start && end && start >= end) {
-      return { dateOrder: true };
-    }
-    return null;
+    // Dispatch through the store; success/failure are handled via Actions stream above.
+    this.store.dispatch(ProjectsActions.createProject({ data: this.form }));
   }
 }
