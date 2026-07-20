@@ -1,16 +1,13 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
+import { PendingChangesGuard } from './core/guards/pending-changes.guard';
 import { UserRole } from './core/models/user.model';
 import { DefaultLayoutComponent } from './shared/layouts/default-layout/default-layout';
 import { AuthLayoutComponent } from './shared/layouts/auth-layout/auth-layout';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   {
     path: 'auth',
     component: AuthLayoutComponent,
@@ -57,6 +54,7 @@ export const routes: Routes = [
               import('./features/projects/project-form/project-form').then(
                 (m) => m.ProjectFormComponent,
               ),
+            canDeactivate: [PendingChangesGuard],
           },
           {
             path: ':id',
@@ -71,6 +69,7 @@ export const routes: Routes = [
               import('./features/projects/project-form/project-form').then(
                 (m) => m.ProjectFormComponent,
               ),
+            canDeactivate: [PendingChangesGuard],
           },
         ],
       },
@@ -132,16 +131,16 @@ export const routes: Routes = [
           {
             path: 'new',
             loadComponent: () =>
-              import('./features/marketplace/marketplace-create-listing/marketplace-create-listing').then(
-                (m) => m.MarketplaceCreateListingComponent,
-              ),
+              import(
+                './features/marketplace/marketplace-create-listing/marketplace-create-listing'
+              ).then((m) => m.MarketplaceCreateListingComponent),
           },
           {
             path: 'orderbook/:projectId',
             loadComponent: () =>
-              import('./features/marketplace/marketplace-order-book/marketplace-order-book').then(
-                (m) => m.MarketplaceOrderBookComponent,
-              ),
+              import(
+                './features/marketplace/marketplace-order-book/marketplace-order-book'
+              ).then((m) => m.MarketplaceOrderBookComponent),
           },
         ],
       },
@@ -165,9 +164,9 @@ export const routes: Routes = [
           {
             path: ':id/certificate',
             loadComponent: () =>
-              import('./features/retirement/retirement-certificate/retirement-certificate').then(
-                (m) => m.RetirementCertificateComponent,
-              ),
+              import(
+                './features/retirement/retirement-certificate/retirement-certificate'
+              ).then((m) => m.RetirementCertificateComponent),
           },
         ],
       },
@@ -259,14 +258,13 @@ export const routes: Routes = [
           {
             path: 'users',
             loadComponent: () =>
-              import('./features/admin/admin-users/admin-users').then((m) => m.AdminUsersComponent),
+              import('./features/admin/admin-users/admin-users').then(
+                (m) => m.AdminUsersComponent,
+              ),
           },
         ],
       },
     ],
   },
-  {
-    path: '**',
-    redirectTo: 'dashboard',
-  },
+  { path: '**', redirectTo: 'dashboard' },
 ];
