@@ -3,7 +3,11 @@ import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NgIf, NgFor, DecimalPipe } from '@angular/common';
 import { Subject, takeUntil, interval } from 'rxjs';
-import { SensorParameterKey, SensorDevice, SensorReading } from '../../../core/models/sensor-reading.model';
+import {
+  SensorParameterKey,
+  SensorDevice,
+  SensorReading,
+} from '../../../core/models/sensor-reading.model';
 import { getSensorValue } from '../../../core/utils/sensor.utils';
 import { AppState } from '../../../core/store/app.state';
 import { SensorsService } from '../../../core/services/sensors.service';
@@ -77,7 +81,10 @@ const PARAMETER_CONFIGS: ParameterConfig[] = [
   },
 ];
 
-const STATUS_THRESHOLDS: Record<SensorParameterKey, { good: [number, number]; warning: [number, number] }> = {
+const STATUS_THRESHOLDS: Record<
+  SensorParameterKey,
+  { good: [number, number]; warning: [number, number] }
+> = {
   ph: { good: [6.5, 8.5], warning: [6.0, 9.0] },
   turbidity: { good: [0, 5], warning: [0, 15] },
   dissolvedOxygen: { good: [6, 20], warning: [4, 20] },
@@ -195,7 +202,9 @@ const STATUS_THRESHOLDS: Record<SensorParameterKey, { good: [number, number]; wa
                 *ngFor="let val of sparklineData[param.key] || []; let i = index"
                 class="flex-1 rounded-t transition-all duration-300"
                 [style.height.%]="
-                  sparklineMax[param.key] > 0 ? (val / sparklineMax[param.key]) * 100 : 0
+                  (sparklineMax[param.key] || 0) > 0
+                    ? (val / (sparklineMax[param.key] || 1)) * 100
+                    : 0
                 "
                 [style.background]="param.color"
                 [style.opacity]="0.3 + (i / (sparklineData[param.key]?.length || 1)) * 0.7"
