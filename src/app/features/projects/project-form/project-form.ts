@@ -16,10 +16,6 @@ import { MapViewComponent, MapLocation } from '../../../shared/components/map-vi
 import { PendingChanges } from '../../../core/guards/pending-changes.guard';
 import * as ProjectsActions from '../../../core/store/projects/projects.actions';
 import {
-  selectProjectsLoading,
-  selectProjectsError,
-} from '../../../core/store/projects/projects.selectors';
-import {
   LucideAngularModule,
   ChevronLeft,
   ChevronRight,
@@ -398,22 +394,19 @@ export class ProjectFormComponent implements OnInit, OnDestroy {
   // ── lifecycle ───────────────────────────────────────────────────────────
   private destroy$ = new Subject<void>();
 
-  private destroy$ = new Subject<void>();
-
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private store: Store,
     private actions$: Actions,
-    private projectsService: ProjectsService,
+    private apiService: ApiService,
     private notificationService: NotificationService,
   ) {}
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.isEdit = true;
       try {
         const project = await this.projectsService.getProject(id);
         this.form = {
@@ -508,6 +501,6 @@ export class ProjectFormComponent implements OnInit, OnDestroy {
     if (this.saving) return;
     this.saving = true;
     // Dispatch through the store; success/failure are handled via Actions stream above.
-    this.store.dispatch(ProjectsActions.createProject({ data: this.form }));
+    this.store.dispatch(ProjectsActions.createProject({ data: { name: this.step0.get('name')!.value as string, description: this.step0.get('description')!.value as string, methodology: this.step0.get('methodology')!.value as string, latitude: this.step1.get('latitude')!.value as number, longitude: this.step1.get('longitude')!.value as number, areaHectares: this.step2.get('areaHectares')!.value as number, baselineStart: this.step2.get('baselineStart')!.value as string, baselineEnd: this.step2.get('projectStartDate')!.value as string } }));
   }
 }
