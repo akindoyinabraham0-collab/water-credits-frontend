@@ -3,7 +3,9 @@ import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NgIf, NgFor, DecimalPipe } from '@angular/common';
 import { Subject, takeUntil, interval } from 'rxjs';
-import { SensorDevice, SensorReading } from '../../../core/models/sensor-reading.model';
+import { SensorParameterKey, SensorDevice, SensorReading } from '../../../core/models/sensor-reading.model';
+import { getSensorValue } from '../../../core/utils/sensor.utils';
+import { AppState } from '../../../core/store/app.state';
 import { SensorsService } from '../../../core/services/sensors.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -75,7 +77,7 @@ const PARAMETER_CONFIGS: ParameterConfig[] = [
   },
 ];
 
-const STATUS_THRESHOLDS: Record<string, { good: [number, number]; warning: [number, number] }> = {
+const STATUS_THRESHOLDS: Record<SensorParameterKey, { good: [number, number]; warning: [number, number] }> = {
   ph: { good: [6.5, 8.5], warning: [6.0, 9.0] },
   turbidity: { good: [0, 5], warning: [0, 15] },
   dissolvedOxygen: { good: [6, 20], warning: [4, 20] },
@@ -281,8 +283,8 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   protected wsConnected = false;
   protected autoRefresh = false;
   protected mainChartSeries: ChartSeries[] = [];
-  protected sparklineData: Record<string, number[]> = {};
-  protected sparklineMax: Record<string, number> = {};
+  protected sparklineData: Partial<Record<SensorParameterKey, number[]>> = {};
+  protected sparklineMax: Partial<Record<SensorParameterKey, number>> = {};
   protected parameterConfigs = PARAMETER_CONFIGS;
   private refreshInterval = 30000;
   private destroy$ = new Subject<void>();
@@ -309,7 +311,7 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private store: Store,
+    private store: Store<AppState>,
     private sensorsService: SensorsService,
     private wsService: WebsocketService,
     private notificationService: NotificationService,
@@ -334,7 +336,7 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
       });
 
     this.store
-      .select((state) => (state as any).sensors)
+      .select((state) => state.sensors)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (sensors) => {
@@ -377,10 +379,10 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
       const points: { x: number; y: number }[] = [];
 
       for (const r of this.recentReadings) {
-        const val = (r as any)[param.key];
+        const val = getSensorValue(r, param.key);
         if (val != null) {
-          values.push(val as number);
-          points.push({ x: new Date(r.timestamp).getTime(), y: val as number });
+          values.push(val);
+          points.push({ x: new Date(r.timestamp).getTime(), y: val });
         }
       }
 
@@ -416,12 +418,12 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected getLatestValue(paramKey: string): number | null {
+  protected getLatestValue(paramKey: SensorParameterKey): number | null {
     if (!this.latestReading) return null;
-    return (this.latestReading as any)[paramKey] ?? null;
+    return getSensorValue(this.latestReading, paramKey);
   }
 
-  protected getStatusDot(paramKey: string, value: number | null): string {
+  protected getStatusDot(paramKey: SensorParameterKey, value: number | null): string {
     if (value == null) return 'bg-slate-300 dark:bg-slate-600';
     const thresholds = STATUS_THRESHOLDS[paramKey];
     if (!thresholds) return 'bg-slate-300 dark:bg-slate-600';
