@@ -34,7 +34,14 @@ export const uiReducer = createReducer(
   on(UIActions.setDarkMode, (state, { isDark }) => ({ ...state, isDarkMode: isDark })),
   on(UIActions.setLoading, (state, { isLoading }) => ({ ...state, isLoading })),
   on(UIActions.addNotification, (state, { id, type, title, message }) => {
-    const notification: Notification = { id, type, title, message, timestamp: Date.now(), read: false };
+    const notification: Notification = {
+      id,
+      type,
+      title,
+      message,
+      timestamp: Date.now(),
+      read: false,
+    };
     const notifications = [notification, ...state.notifications].slice(0, MAX_NOTIFICATIONS);
     return { ...state, notifications, unreadNotificationCount: state.unreadNotificationCount + 1 };
   }),

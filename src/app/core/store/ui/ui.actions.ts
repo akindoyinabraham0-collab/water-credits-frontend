@@ -6,7 +6,13 @@ export const setLoading = createAction('[UI] Set Loading', props<{ isLoading: bo
 
 export const addNotification = createAction(
   '[UI] Add Notification',
-  props<{ id: string; type: 'success' | 'error' | 'info' | 'warning'; title: string; message: string; duration?: number }>(),
+  props<{
+    id: string;
+    notificationType: 'success' | 'error' | 'info' | 'warning';
+    title: string;
+    message: string;
+    duration?: number;
+  }>(),
 );
 export const removeNotification = createAction('[UI] Remove Notification', props<{ id: string }>());
 export const markNotificationsRead = createAction('[UI] Mark Notifications Read');
