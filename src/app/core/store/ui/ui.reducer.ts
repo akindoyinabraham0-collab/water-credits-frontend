@@ -3,7 +3,7 @@ import * as UIActions from './ui.actions';
 
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'info' | 'warning';
+  notificationType: 'success' | 'error' | 'info' | 'warning';
   title: string;
   message: string;
   timestamp: number;
@@ -33,10 +33,10 @@ export const uiReducer = createReducer(
   on(UIActions.toggleSidebar, (state) => ({ ...state, sidebarOpen: !state.sidebarOpen })),
   on(UIActions.setDarkMode, (state, { isDark }) => ({ ...state, isDarkMode: isDark })),
   on(UIActions.setLoading, (state, { isLoading }) => ({ ...state, isLoading })),
-  on(UIActions.addNotification, (state, { id, type, title, message }) => {
+  on(UIActions.addNotification, (state, { id, notificationType, title, message }) => {
     const notification: Notification = {
       id,
-      type,
+      notificationType,
       title,
       message,
       timestamp: Date.now(),
