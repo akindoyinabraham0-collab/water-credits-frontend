@@ -34,8 +34,6 @@ export const INCOMPATIBLE_UNIT_GROUPS: string[][] = [
  * incompatible-unit group, requiring a secondary Y-axis.
  */
 export function needsDualAxis(paramKeys: string[]): boolean {
-  const groups = INCOMPATIBLE_UNIT_GROUPS.filter((g) =>
-    g.some((k) => paramKeys.includes(k)),
-  );
+  const groups = INCOMPATIBLE_UNIT_GROUPS.filter((g) => g.some((k) => paramKeys.includes(k)));
   return groups.length >= 2;
 }

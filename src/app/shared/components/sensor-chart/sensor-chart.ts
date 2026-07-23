@@ -13,15 +13,10 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
-import {
-  Chart,
-  ChartConfiguration,
-  ChartDataset,
-  ScaleOptionsByType,
-  registerables,
-} from 'chart.js';
-import Annotation from 'chartjs-plugin-annotation';
-import { SensorReading } from '../../../core/models/sensor-reading.model';
+import { Chart, ChartConfiguration, ChartDataset, ChartOptions, registerables } from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
+import { SensorReading, SensorParameterKey } from '../../../core/models/sensor-reading.model';
+import { getSensorValue } from '../../../core/utils/sensor.utils';
 import {
   SensorParameter,
   TimeRange,
@@ -29,7 +24,9 @@ import {
   needsDualAxis,
 } from './sensor-parameter.model';
 
-Chart.register(...registerables, Annotation);
+// chartjs-plugin-annotation provides its own PluginOptionsByType augmentation via its
+// bundled types — no additional declare-module block needed here.
+Chart.register(...registerables, annotationPlugin);
 
 /** Legacy interface kept for backward compatibility with sensors-dashboard */
 export interface ChartSeries {
@@ -100,10 +97,7 @@ export interface ChartSeries {
           class="flex items-center gap-1.5 text-xs transition-opacity"
           [class.opacity-40]="hiddenParams.has(p.key)"
         >
-          <span
-            class="inline-block w-3 h-3 rounded-full"
-            [style.background]="p.color"
-          ></span>
+          <span class="inline-block w-3 h-3 rounded-full" [style.background]="p.color"></span>
           {{ p.label }}
           <span *ngIf="p.unit" class="text-slate-400">({{ p.unit }})</span>
         </button>
@@ -198,9 +192,7 @@ export class SensorChartComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   // New API: SensorReading[] + SensorParameter[]
-  private buildNewApiConfig(
-    _ctx: CanvasRenderingContext2D,
-  ): ChartConfiguration<'line'> | null {
+  private buildNewApiConfig(_ctx: CanvasRenderingContext2D): ChartConfiguration<'line'> | null {
     const data = this.data ?? [];
     const params = this.parameters ?? [];
     if (!params.length) return null;
@@ -211,11 +203,11 @@ export class SensorChartComponent implements AfterViewInit, OnChanges, OnDestroy
     const datasets: ChartDataset<'line'>[] = params.map((p, i) => ({
       label: p.label + (p.unit ? ` (${p.unit})` : ''),
       data: data
-        .filter((r) => (r as Record<string, unknown>)[p.key] != null)
         .map((r) => ({
           x: new Date(r.timestamp).getTime(),
-          y: (r as Record<string, unknown>)[p.key] as number,
-        })),
+          y: getSensorValue(r, p.key as SensorParameterKey),
+        }))
+        .filter((point): point is { x: number; y: number } => point.y !== null),
       borderColor: p.color,
       backgroundColor: p.color + '1A',
       fill: false,
@@ -269,13 +261,13 @@ export class SensorChartComponent implements AfterViewInit, OnChanges, OnDestroy
       }
     }
 
-    const scales: ChartConfiguration<'line'>['options']['scales'] = {
+    const scales: NonNullable<ChartOptions<'line'>['scales']> = {
       x: {
         type: 'time',
         time: { tooltipFormat: 'MMM d, HH:mm', displayFormats: { hour: 'HH:mm', day: 'MMM d' } },
         grid: { display: false },
         ticks: { color: '#94A3B8', maxTicksLimit: 8 },
-      } as unknown as ScaleOptionsByType<'time'>,
+      },
       y: {
         beginAtZero: false,
         grid: { color: '#F1F5F920' },
@@ -293,35 +285,35 @@ export class SensorChartComponent implements AfterViewInit, OnChanges, OnDestroy
       };
     }
 
-    return {
-      type: 'line',
-      data: { datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { intersect: false, mode: 'index' },
-        plugins: {
-          legend: { display: false }, // custom legend in template
-          annotation: { annotations: annotationEntries },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => {
-                const param = params[ctx.datasetIndex];
-                const val = (ctx.parsed.y as number).toFixed(param?.decimals ?? 2);
-                return ` ${param?.label ?? ''}: ${val}${param?.unit ? ' ' + param.unit : ''}`;
-              },
+    const options: ChartOptions<'line'> = {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false }, // custom legend in template
+        annotation: { annotations: annotationEntries },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const param = params[ctx.datasetIndex];
+              const val = (ctx.parsed.y as number).toFixed(param?.decimals ?? 2);
+              return ` ${param?.label ?? ''}: ${val}${param?.unit ? ' ' + param.unit : ''}`;
             },
           },
         },
-        scales,
       },
+      scales,
+    };
+
+    return {
+      type: 'line',
+      data: { datasets },
+      options,
     };
   }
 
   // Legacy API: ChartSeries[]
-  private buildLegacyConfig(
-    _ctx: CanvasRenderingContext2D,
-  ): ChartConfiguration<'line'> | null {
+  private buildLegacyConfig(_ctx: CanvasRenderingContext2D): ChartConfiguration<'line'> | null {
     const series = this.series ?? [];
 
     return {

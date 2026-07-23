@@ -19,7 +19,10 @@ import {
 } from '../../../shared/components/data-table/data-table.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner';
 import { SensorChartComponent } from '../../../shared/components/sensor-chart/sensor-chart';
-import { SensorParameter, TimeRange } from '../../../shared/components/sensor-chart/sensor-parameter.model';
+import {
+  SensorParameter,
+  TimeRange,
+} from '../../../shared/components/sensor-chart/sensor-parameter.model';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import * as SensorsActions from '../../../core/store/sensors/sensors.actions';
 import {
@@ -289,9 +292,6 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   protected latestReading: SensorReading | null = null;
   protected wsConnected = false;
   protected autoRefresh = false;
-  protected sparklineData: Record<string, number[]> = {};
-  protected sparklineMax: Record<string, number> = {};
-  protected mainChartSeries: ChartSeries[] = [];
   protected sparklineData: Partial<Record<SensorParameterKey, number[]>> = {};
   protected sparklineMax: Partial<Record<SensorParameterKey, number>> = {};
   protected parameterConfigs = PARAMETER_CONFIGS;
@@ -406,9 +406,7 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
       for (const r of this.recentReadings) {
         const val = getSensorValue(r, param.key);
         if (val != null) {
-          values.push(val as number);
           values.push(val);
-          points.push({ x: new Date(r.timestamp).getTime(), y: val });
         }
       }
 

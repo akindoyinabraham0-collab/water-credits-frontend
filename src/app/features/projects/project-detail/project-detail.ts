@@ -10,7 +10,10 @@ import { CreditAmountPipe } from '../../../shared/pipes/credit-amount.pipe';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { StellarAddressPipe } from '../../../shared/pipes/stellar-address.pipe';
 import { SensorChartComponent } from '../../../shared/components/sensor-chart/sensor-chart';
-import { SensorParameter, TimeRange } from '../../../shared/components/sensor-chart/sensor-parameter.model';
+import {
+  SensorParameter,
+  TimeRange,
+} from '../../../shared/components/sensor-chart/sensor-parameter.model';
 import { SensorReading } from '../../../core/models/sensor-reading.model';
 import { SensorsService } from '../../../core/services/sensors.service';
 import { Project } from '../../../core/models/project.model';
@@ -202,10 +205,7 @@ type ProjectTab = 'overview' | 'sensors';
               <h3
                 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2"
               >
-                <lucide-angular
-                  [img]="FileText"
-                  class="w-4 h-4 text-stellar-blue"
-                ></lucide-angular>
+                <lucide-angular [img]="FileText" class="w-4 h-4 text-stellar-blue"></lucide-angular>
                 Documents
               </h3>
               <div class="text-center py-6 text-sm text-slate-400">No documents uploaded</div>
@@ -215,10 +215,7 @@ type ProjectTab = 'overview' | 'sensors';
               <h3
                 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2"
               >
-                <lucide-angular
-                  [img]="Activity"
-                  class="w-4 h-4 text-stellar-blue"
-                ></lucide-angular>
+                <lucide-angular [img]="Activity" class="w-4 h-4 text-stellar-blue"></lucide-angular>
                 Recent Activity
               </h3>
               <div class="text-center py-6 text-sm text-slate-400">No recent activity</div>

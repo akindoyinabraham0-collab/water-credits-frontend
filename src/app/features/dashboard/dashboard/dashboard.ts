@@ -1,7 +1,3 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NgIf, NgFor, SlicePipe } from '@angular/common';
-import { Store } from '@ngrx/store';
-import { Subject, takeUntil } from 'rxjs';
 import { Component, OnInit, OnDestroy, Optional, signal } from '@angular/core';
 import { NgIf, NgFor, SlicePipe, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -13,10 +9,12 @@ import { WebsocketService } from '../../../core/services/websocket.service';
 import { AnalyticsOverview, CreditsOverTimePoint } from '../../../core/models/analytics.model';
 import { RecentRetirement } from '../../../core/models/retirement.model';
 import { SensorChartComponent } from '../../../shared/components/sensor-chart/sensor-chart';
-import { SensorParameter, TimeRange } from '../../../shared/components/sensor-chart/sensor-parameter.model';
-import { SensorReading } from '../../../core/models/sensor-reading.model';
+import {
+  SensorParameter,
+  TimeRange,
+} from '../../../shared/components/sensor-chart/sensor-parameter.model';
+import { SensorReading, SensorAlert } from '../../../core/models/sensor-reading.model';
 import { selectRecentReadings } from '../../../core/store/sensors/sensors.selectors';
-import { SensorAlert } from '../../../core/models/sensor-reading.model';
 import * as AnalyticsActions from '../../../core/store/analytics/analytics.actions';
 import {
   selectAnalyticsOverview,
@@ -41,7 +39,13 @@ import {
 const SENSOR_SUMMARY_PARAMS: SensorParameter[] = [
   { key: 'ph', label: 'pH', unit: '', color: '#7B2FBE', decimals: 2 },
   { key: 'turbidity', label: 'Turbidity', unit: 'NTU', color: '#F59E0B', decimals: 1 },
-  { key: 'dissolvedOxygen', label: 'Dissolved O₂', unit: 'mg/L', color: '#3B82F6', decimals: 1 },
+  {
+    key: 'dissolvedOxygen',
+    label: 'Dissolved O₂',
+    unit: 'mg/L',
+    color: '#3B82F6',
+    decimals: 1,
+  },
 ];
 
 const SENSOR_THRESHOLDS: Record<string, { low?: number; high?: number }> = {
@@ -55,14 +59,11 @@ const SENSOR_THRESHOLDS: Record<string, { low?: number; high?: number }> = {
     NgIf,
     NgFor,
     SlicePipe,
-    CreditAmountPipe,
-    DateFormatPipe,
-    LucideAngularModule,
-    SensorChartComponent,
     AsyncPipe,
     CreditAmountPipe,
     DateFormatPipe,
     LucideAngularModule,
+    SensorChartComponent,
   ],
   template: `
     @if (updateAvailable()) {
@@ -315,9 +316,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private wsService: WebsocketService,
-    private loggingService: LoggingService,
-    private store: Store,
-  ) {}
     @Optional() private swUpdate?: SwUpdate,
   ) {
     this.loading$ = this.store.select(selectDashboardLoading);
@@ -373,8 +371,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         },
         error: () => {},
       });
-
-    await this.loadData();
   }
 
   ngOnDestroy(): void {
@@ -388,27 +384,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // for the dashboard widget we just update the displayed range label.
   }
 
-  private async loadData(): Promise<void> {
-    try {
-      const [overview, creditsOverTime] = await Promise.all([
-        this.analyticsService.getOverview(),
-        this.analyticsService.getCreditsOverTime(30),
-      ]);
-      this.overview = overview;
-      this.creditsOverTime = creditsOverTime;
-    } catch (error) {
-      this.loggingService.error('Failed to load dashboard data:', error);
-    } finally {
-      this.loading = false;
-    }
-  }
-
-  getMintedHeight(value: number): number {
-    return this.getChartBarHeight(value);
-  }
-
-  getRetiredHeight(value: number): number {
-    return this.getChartBarHeight(value);
   getMintedHeight(point: CreditsOverTimePoint): number {
     return (point.minted / this.chartMax) * 200;
   }
