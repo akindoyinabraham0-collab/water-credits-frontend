@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgIf, NgFor, SlicePipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Subject, takeUntil } from 'rxjs';
+import { Component, OnInit, OnDestroy, Optional, signal } from '@angular/core';
 import { NgIf, NgFor, SlicePipe, AsyncPipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
@@ -24,6 +25,7 @@ import {
   selectDashboardLoading,
 } from '../../../core/store/analytics/analytics.selectors';
 import { AppState } from '../../../core/store/app.state';
+import { SwUpdate } from '@angular/service-worker';
 import {
   LucideAngularModule,
   Droplets,
@@ -32,6 +34,7 @@ import {
   TrendingUp,
   Activity,
   AlertTriangle,
+  RefreshCw,
 } from 'lucide-angular';
 
 /** Parameters shown in the sensor summary widget on the main dashboard */
@@ -62,6 +65,13 @@ const SENSOR_THRESHOLDS: Record<string, { low?: number; high?: number }> = {
     LucideAngularModule,
   ],
   template: `
+    @if (updateAvailable()) {
+      <div class="update-toast" role="status" aria-live="polite">
+        <lucide-angular [img]="RefreshCw" class="update-toast__icon"></lucide-angular>
+        <span class="update-toast__text">A new version is available.</span>
+        <button type="button" class="update-toast__btn" (click)="reloadApp()">Reload</button>
+      </div>
+    }
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
@@ -289,6 +299,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected sensorSummaryParams = SENSOR_SUMMARY_PARAMS;
   protected sensorThresholds = SENSOR_THRESHOLDS;
   protected sensorTimeRange: TimeRange = '24h';
+  protected readonly updateAvailable = signal<boolean>(false);
 
   private destroy$ = new Subject<void>();
   private chartMax = 1;
@@ -299,6 +310,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly Activity = Activity;
   protected readonly AlertTriangle = AlertTriangle;
   protected readonly Droplets = Droplets;
+  protected readonly RefreshCw = RefreshCw;
 
   constructor(
     private store: Store<AppState>,
@@ -306,6 +318,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private loggingService: LoggingService,
     private store: Store,
   ) {}
+    @Optional() private swUpdate?: SwUpdate,
   ) {
     this.loading$ = this.store.select(selectDashboardLoading);
     this.overview$ = this.store.select(selectAnalyticsOverview);
@@ -330,6 +343,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.wsService.connected$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (connected) => (this.wsConnected = connected),
     });
+
+    // Subscribe to service-worker updates when available (no-op in dev/tests).
+    if (this.swUpdate?.isEnabled) {
+      this.swUpdate.versionUpdates.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+        if (event.type === 'VERSION_READY') {
+          this.updateAvailable.set(true);
+        }
+      });
+    }
 
     // Dispatch all three data loads; effects handle deduplication via switchMap
     this.store.dispatch(AnalyticsActions.loadAnalyticsOverview());
@@ -393,5 +415,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getRetiredHeight(point: CreditsOverTimePoint): number {
     return (point.retired / this.chartMax) * 200;
+  }
+
+  reloadApp(): void {
+    if (this.swUpdate?.isEnabled) {
+      this.swUpdate
+        .activateUpdate()
+        .then(() => document.location.reload())
+        .catch(() => document.location.reload());
+    } else {
+      document.location.reload();
+    }
   }
 }

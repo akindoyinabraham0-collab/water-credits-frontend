@@ -3,7 +3,13 @@ import { RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { NgIf, NgFor, DecimalPipe } from '@angular/common';
 import { Subject, takeUntil, interval } from 'rxjs';
-import { SensorDevice, SensorReading } from '../../../core/models/sensor-reading.model';
+import {
+  SensorParameterKey,
+  SensorDevice,
+  SensorReading,
+} from '../../../core/models/sensor-reading.model';
+import { getSensorValue } from '../../../core/utils/sensor.utils';
+import { AppState } from '../../../core/store/app.state';
 import { SensorsService } from '../../../core/services/sensors.service';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -11,13 +17,10 @@ import {
   DataTableComponent,
   ColumnDef,
 } from '../../../shared/components/data-table/data-table.component';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
-import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner';
 import { SensorChartComponent } from '../../../shared/components/sensor-chart/sensor-chart';
 import { SensorParameter, TimeRange } from '../../../shared/components/sensor-chart/sensor-parameter.model';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
-import { NumberAbbreviatePipe } from '../../../shared/pipes/number-abbreviate.pipe';
 import * as SensorsActions from '../../../core/store/sensors/sensors.actions';
 import {
   LucideAngularModule,
@@ -73,7 +76,10 @@ const PARAMETER_CONFIGS: ParameterConfig[] = [
   },
 ];
 
-const STATUS_THRESHOLDS: Record<string, { good: [number, number]; warning: [number, number] }> = {
+const STATUS_THRESHOLDS: Record<
+  SensorParameterKey,
+  { good: [number, number]; warning: [number, number] }
+> = {
   ph: { good: [6.5, 8.5], warning: [6.0, 9.0] },
   turbidity: { good: [0, 5], warning: [0, 15] },
   dissolvedOxygen: { good: [6, 20], warning: [4, 20] },
@@ -97,12 +103,9 @@ const CHART_THRESHOLDS: Record<string, { low?: number; high?: number }> = {
     DecimalPipe,
     RouterLink,
     DataTableComponent,
-    StatusBadgeComponent,
-    EmptyStateComponent,
     LoadingSpinnerComponent,
     SensorChartComponent,
     DateFormatPipe,
-    NumberAbbreviatePipe,
     LucideAngularModule,
   ],
   template: `
@@ -196,7 +199,9 @@ const CHART_THRESHOLDS: Record<string, { low?: number; high?: number }> = {
                 *ngFor="let val of sparklineData[param.key] || []; let i = index"
                 class="flex-1 rounded-t transition-all duration-300"
                 [style.height.%]="
-                  sparklineMax[param.key] > 0 ? (val / sparklineMax[param.key]) * 100 : 0
+                  (sparklineMax[param.key] || 0) > 0
+                    ? (val / (sparklineMax[param.key] || 1)) * 100
+                    : 0
                 "
                 [style.background]="param.color"
                 [style.opacity]="0.3 + (i / (sparklineData[param.key]?.length || 1)) * 0.7"
@@ -286,6 +291,9 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   protected autoRefresh = false;
   protected sparklineData: Record<string, number[]> = {};
   protected sparklineMax: Record<string, number> = {};
+  protected mainChartSeries: ChartSeries[] = [];
+  protected sparklineData: Partial<Record<SensorParameterKey, number[]>> = {};
+  protected sparklineMax: Partial<Record<SensorParameterKey, number>> = {};
   protected parameterConfigs = PARAMETER_CONFIGS;
   protected selectedTimeRange: TimeRange = '24h';
   protected chartThresholds = CHART_THRESHOLDS;
@@ -324,7 +332,7 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private store: Store,
+    private store: Store<AppState>,
     private sensorsService: SensorsService,
     private wsService: WebsocketService,
     private notificationService: NotificationService,
@@ -349,10 +357,11 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
       });
 
     this.store
-      .select((state) => (state as any).sensors)
+      .select((state) => state.sensors)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (sensors) => {
+          if (!sensors) return;
           this.devices = sensors.devices;
           this.recentReadings = sensors.recentReadings;
           this.updateDerivedData();
@@ -395,9 +404,11 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
       const values: number[] = [];
 
       for (const r of this.recentReadings) {
-        const val = (r as any)[param.key];
+        const val = getSensorValue(r, param.key);
         if (val != null) {
           values.push(val as number);
+          values.push(val);
+          points.push({ x: new Date(r.timestamp).getTime(), y: val });
         }
       }
 
@@ -426,12 +437,12 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected getLatestValue(paramKey: string): number | null {
+  protected getLatestValue(paramKey: SensorParameterKey): number | null {
     if (!this.latestReading) return null;
-    return (this.latestReading as any)[paramKey] ?? null;
+    return getSensorValue(this.latestReading, paramKey);
   }
 
-  protected getStatusDot(paramKey: string, value: number | null): string {
+  protected getStatusDot(paramKey: SensorParameterKey, value: number | null): string {
     if (value == null) return 'bg-slate-300 dark:bg-slate-600';
     const thresholds = STATUS_THRESHOLDS[paramKey];
     if (!thresholds) return 'bg-slate-300 dark:bg-slate-600';
