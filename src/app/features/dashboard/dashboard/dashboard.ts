@@ -5,6 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CreditAmountPipe } from '../../../shared/pipes/credit-amount.pipe';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
+import { SensorSummaryWidgetComponent } from '../widgets/sensor-summary-widget/sensor-summary-widget';
 import { WebsocketService } from '../../../core/services/websocket.service';
 import { AnalyticsOverview, CreditsOverTimePoint } from '../../../core/models/analytics.model';
 import { RecentRetirement } from '../../../core/models/retirement.model';
@@ -37,6 +38,7 @@ import {
     AsyncPipe,
     CreditAmountPipe,
     DateFormatPipe,
+    SensorSummaryWidgetComponent,
     LucideAngularModule,
   ],
   template: `
@@ -208,6 +210,8 @@ import {
             </div>
           </div>
         </div>
+
+        <app-sensor-summary-widget></app-sensor-summary-widget>
 
         <div class="card p-5">
           <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">

@@ -14,10 +14,12 @@ import {
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner';
+import { SensorChartComponent } from '../../../shared/components/sensor-chart/sensor-chart.component';
 import {
-  SensorChartComponent,
-  ChartSeries,
-} from '../../../shared/components/sensor-chart/sensor-chart';
+  SensorParameter,
+  SensorThresholds,
+  TimeRange,
+} from '../../../shared/components/sensor-chart/sensor-parameter.model';
 import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { NumberAbbreviatePipe } from '../../../shared/pipes/number-abbreviate.pipe';
 import * as SensorsActions from '../../../core/store/sensors/sensors.actions';
@@ -206,9 +208,12 @@ const STATUS_THRESHOLDS: Record<string, { good: [number, number]; warning: [numb
           <div>
             <app-sensor-chart
               [title]="'Recent Readings'"
-              [series]="mainChartSeries"
+              [data]="recentReadings"
+              [parameters]="chartParameters"
+              [timeRange]="timeRange"
+              [thresholds]="sensorThresholds"
               [height]="280"
-              [timeRanges]="['1H', '6H', '24H', '7D', '30D']"
+              (rangeChange)="onRangeChange($event)"
             />
           </div>
           <div class="card p-5">
@@ -280,10 +285,12 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   protected latestReading: SensorReading | null = null;
   protected wsConnected = false;
   protected autoRefresh = false;
-  protected mainChartSeries: ChartSeries[] = [];
   protected sparklineData: Record<string, number[]> = {};
   protected sparklineMax: Record<string, number> = {};
   protected parameterConfigs = PARAMETER_CONFIGS;
+  protected timeRange: TimeRange = { value: '24h', label: '24h' };
+  protected chartParameters: SensorParameter[] = [];
+  protected sensorThresholds: Record<string, SensorThresholds> = {};
   private refreshInterval = 30000;
   private destroy$ = new Subject<void>();
 
@@ -369,33 +376,53 @@ export class SensorsDashboardComponent implements OnInit, OnDestroy {
   private updateDerivedData(): void {
     this.latestReading = this.recentReadings.length > 0 ? this.recentReadings[0] : null;
 
-    const chartData: Record<string, { x: number; y: number }[]> = {};
     const sparklines: Record<string, number[]> = {};
 
     for (const param of this.parameterConfigs) {
       const values: number[] = [];
-      const points: { x: number; y: number }[] = [];
 
       for (const r of this.recentReadings) {
-        const val = (r as any)[param.key];
-        if (val != null) {
-          values.push(val as number);
-          points.push({ x: new Date(r.timestamp).getTime(), y: val as number });
+        const val = (r as unknown as Record<string, unknown>)[param.key];
+        if (typeof val === 'number') {
+          values.push(val);
         }
       }
 
       sparklines[param.key] = values.slice(0, 20).reverse();
       this.sparklineMax[param.key] = values.length > 0 ? Math.max(...values, 0.001) : 1;
-
-      if (points.length > 0) {
-        chartData[param.key] = points.slice(0, 60).reverse();
-      }
     }
 
     this.sparklineData = sparklines;
-    this.mainChartSeries = this.parameterConfigs
-      .filter((p) => chartData[p.key]?.length)
-      .map((p) => ({ label: p.label, data: chartData[p.key]!, color: p.color }));
+
+    // Cast ParameterConfig → SensorParameter (chart doesn't need the icon).
+    this.chartParameters = this.parameterConfigs.map(({ key, label, unit, color, decimals }) => ({
+      key,
+      label,
+      unit,
+      color,
+      decimals,
+    }));
+
+    // Derive safe thresholds (warning bounds in STATUS_THRESHOLDS) per param
+    // so the chart can render dashed annotation lines without us having to
+    // hand-roll the threshold map.
+    const thresholds: Record<string, SensorThresholds> = {};
+    for (const param of this.parameterConfigs) {
+      const t = STATUS_THRESHOLDS[param.key];
+      if (t) {
+        thresholds[param.key] = { low: t.warning[0], high: t.warning[1] };
+      }
+    }
+    this.sensorThresholds = thresholds;
+  }
+
+  protected onRangeChange(range: TimeRange): void {
+    this.timeRange = range;
+    // The store supplies the `recentReadings` buffer; trigger a refresh so
+    // bookkeeping is consistent with the parent's selected window. For now
+    // a no-op is fine — the parent action would dispatch a fetch here in
+    // production (issue scope explicitly excludes chart-driven fetching).
+    void range;
   }
 
   protected toggleAutoRefresh(): void {
