@@ -1,0 +1,24 @@
+<div class="sensor-chart">
+  <div class="header">
+    <h3 *ngIf="title" class="title">{{ title }}</h3>
+    <div class="range-picker" role="group" aria-label="Time range">
+      <button
+        *ngFor="let range of availableRanges"
+        type="button"
+        class="range-button"
+        [class.active]="selectedRange === range.value"
+        [attr.aria-pressed]="selectedRange === range.value"
+        (click)="selectRange(range)"
+      >
+        {{ range.label }}
+      </button>
+    </div>
+  </div>
+
+  <div class="chart-container" [style.height.px]="height">
+    <canvas #chartCanvas aria-hidden="true"></canvas>
+    <div *ngIf="!data?.length" class="empty-state">
+      <span class="empty-state-text">No readings for the selected range.</span>
+    </div>
+  </div>
+</div>
